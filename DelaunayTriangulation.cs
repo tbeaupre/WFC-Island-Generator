@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// https://github.com/vanreusVU/Delaunay-Triangulation
 public class DelaunayTriangulation
 {
     public static List<Triangle> Generate(Vector2[] points)
@@ -100,6 +101,7 @@ public class DelaunayTriangulation
         return triangulation;
     }
 
+    // https://stackoverflow.com/a/44875841
     private static bool IsWithinCircumcircle(Vector2 p, Triangle t)
     {
         Vector2 a_ = t.vertices[0] - p;
