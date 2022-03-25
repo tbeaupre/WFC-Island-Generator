@@ -15,39 +15,41 @@ public class MeshGenerator : MonoBehaviour
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
+    }
 
-        CreateDelaunayTriangulation();
-        // CreateSuperTriangle();
-        // CreateShape();
+    public void Recalculate(List<Vector3> points)
+    {
+        List<Vector2> points2d = new List<Vector2>();
+        foreach(Vector3 p in points)
+        {
+            points2d.Add(new Vector2(p.x, p.z));
+        }
+
+        CreateDelaunayTriangulation(points2d.ToArray());
         UpdateMesh();
     }
 
-    void CreateDelaunayTriangulation()
+    void CreateDelaunayTriangulation(Vector2[] points)
     {
-        var points = new Vector2[] {
-            new Vector2 (0, 0),
-            new Vector2 (0, 1),
-            new Vector2 (1, 0),
-            new Vector2 (1, 1),
-        };
-
         List<Triangle> triangulation = DelaunayTriangulation.Generate(points);
 
         List<Vector2> vertices2dList = new List<Vector2>();
         List<int> trianglesList = new List<int>();
         foreach(Triangle t in triangulation)
         {
-            foreach(Vector2 p in t.vertices)
+            // Swap vertex order so triangles render face up
+            for (int i = t.vertices.Count - 1; i > -1; --i)
             {
-                int i = vertices2dList.IndexOf(p);
-                if (i == -1)
+                Vector2 p = t.vertices[i];
+                int index = vertices2dList.IndexOf(p);
+                if (index == -1)
                 {
                     trianglesList.Add(vertices2dList.Count);
                     vertices2dList.Add(p);
                 }
                 else
                 {
-                    trianglesList.Add(i);
+                    trianglesList.Add(index);
                 }
             }
         }
@@ -55,51 +57,11 @@ public class MeshGenerator : MonoBehaviour
         List<Vector3> verticesList = new List<Vector3>();
         foreach(Vector2 p in vertices2dList)
         {
-            verticesList.Add(p);
+            verticesList.Add(new Vector3(p.x, 0, p.y));
         }
 
         vertices = verticesList.ToArray();
         triangles = trianglesList.ToArray();
-    }
-
-    void CreateSuperTriangle()
-    {
-        var points = new Vector2[] {
-            new Vector2 (0, 0),
-            new Vector2 (0, 1),
-            new Vector2 (1, 0),
-            new Vector2 (1, 1),
-        };
-
-        (Vector2 min, Vector2 max) = Utility.GetCoveringSquare(points);
-        Triangle t = Utility.GetSuperTriangle(min, max);
-
-        vertices = new Vector3[] {
-            t.vertices[0],
-            t.vertices[1],
-            t.vertices[2],
-        };
-        
-        triangles = new int[] {
-            0, 1, 2
-        };
-    }
-
-    void CreateShape()
-    {
-        vertices = new Vector3[]
-        {
-            new Vector3 (0,0,0),
-            new Vector3 (0,0,1),
-            new Vector3 (1,0,0),
-            new Vector3 (1,0,1),
-        };
-
-        triangles = new int[]
-        {
-            0, 1, 2,
-            1, 3, 2,
-        };
     }
 
     void UpdateMesh()
