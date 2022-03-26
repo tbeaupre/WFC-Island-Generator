@@ -8,6 +8,11 @@ public class PointManager : MonoBehaviour
     MeshGenerator mg;
     List<Vector3> points;
 
+    void Awake()
+    {
+        mg = GetComponent<MeshGenerator>();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -17,8 +22,7 @@ public class PointManager : MonoBehaviour
             new Vector3 (1, 0, 0),
         };
         
-        mg = GetComponent<MeshGenerator>();
-        //mg.Recalculate(points);
+        mg.Recalculate(points);
     }
 
     // Update is called once per frame
