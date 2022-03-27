@@ -45,7 +45,8 @@ public class HexGridCreator : MonoBehaviour
             }
 
             prevWidth = xWidth;
-            if (y == size - 1) isShrinking = true;
+            if (y == size - 1)
+                isShrinking = true;
         }
 
         return result;
