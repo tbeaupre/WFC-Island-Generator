@@ -80,39 +80,39 @@ public class PrototypeGenerator : MonoBehaviour
         prototypes.Add(empty);
 
         Debug.Log("Final Prototype Count: " + prototypes.Count);
-        /*
-        foreach (proto1 in prototypes)
+
+        foreach (Prototype proto1 in prototypes)
         {
-            foreach (proto2 in prototypes)
+            proto1.validNeighbors = new ValidNeighbors();
+            foreach (Prototype proto2 in prototypes)
             {
-                if (AreSocketsCompatible(proto1.back, proto2.back))
+                if (AreSocketsCompatible(proto1.sockets.back, proto2.sockets.back))
                     proto1.validNeighbors.back.Add(proto2.name);
                 
-                if (AreSocketsCompatible(proto1.left, proto2.left))
+                if (AreSocketsCompatible(proto1.sockets.left, proto2.sockets.left))
                     proto1.validNeighbors.left.Add(proto2.name);
 
-                if (AreSocketsCompatible(proto1.right, proto2.right))
+                if (AreSocketsCompatible(proto1.sockets.right, proto2.sockets.right))
                     proto1.validNeighbors.right.Add(proto2.name);
 
-                if (AreSocketsCompatible(proto1.top, proto2.bottom))
+                if (AreSocketsCompatible(proto1.sockets.top, proto2.sockets.bottom))
                     proto1.validNeighbors.top.Add(proto2.name);
 
-                if (AreSocketsCompatible(proto1.bottom, proto2.top))
+                if (AreSocketsCompatible(proto1.sockets.bottom, proto2.sockets.top))
                     proto1.validNeighbors.bottom.Add(proto2.name);
             }
         }
+    }
 
-        bool AreSocketsCompatible(string socket1, string socket2)
-        {
-            bool isSymmetrical = socket1.EndsWith('s');
-            bool isVertical = socket1.StartsWith('v');
+    bool AreSocketsCompatible(string socket1, string socket2)
+    {
+        bool isSymmetrical = socket1.EndsWith("s");
+        bool isVertical = socket1.StartsWith("v");
 
-            if (isSymmetrical || isVertical)
-                return socket1 == socket2;
-            
-            return socket1 == socket2 + "f" || socket2 == socket1 + "f";
-        }
-        */
+        if (isSymmetrical || isVertical)
+            return socket1 == socket2;
+        
+        return socket1 == socket2 + "f" || socket2 == socket1 + "f";
     }
 
     string GetVerticalSocketString(string socketName)
