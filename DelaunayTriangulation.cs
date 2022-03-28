@@ -92,6 +92,25 @@ public class DelaunayTriangulation
             }
         }
 
+        // Set up Triangle neighbor lists
+        foreach(Triangle t1 in triangulation)
+        {
+            foreach(Triangle t2 in triangulation)
+            {
+                if (t1 == t2)
+                    continue;
+
+                if (t2.edges.Contains(t1.edges[0]))
+                    t1.backNeighbor = t2;
+                
+                if (t2.edges.Contains(t1.edges[1]))
+                    t1.rightNeighbor = t2;
+
+                if (t2.edges.Contains(t1.edges[2]))
+                    t1.leftNeighbor = t2;
+            }
+        }
+
         Debug.Log(triangulation.Count);
         foreach(Triangle t in triangulation)
         {

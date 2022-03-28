@@ -6,6 +6,9 @@ public class Triangle
 {
     public List<Vector2> vertices;
     public List<Edge> edges;
+    public Triangle backNeighbor;
+    public Triangle rightNeighbor;
+    public Triangle leftNeighbor;
 
     public Triangle(List<Vector2> vertices)
     {
