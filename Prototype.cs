@@ -3,10 +3,38 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class PrototypeSet
+public class BasePrototypeSet
 {
-    public Prototype[] prototypes;
+    public BasePrototype[] basePrototypes;
 }
+
+#region Manually Created Prototype Metadata
+[System.Serializable]
+public class BasePrototype
+{
+    public string name;
+    public string meshName;
+    public bool isSymmetrical;
+    public CornerSet corners;
+}
+
+[System.Serializable]
+public class CornerSet
+{
+    public Corner c0;
+    public Corner c1;
+    public Corner c2;
+}
+
+[System.Serializable]
+public class Corner
+{
+    public string left;
+    public string right;
+    public string top;
+    public string bottom;
+}
+#endregion
 
 [System.Serializable]
 public class Prototype
