@@ -59,19 +59,19 @@ public class SocketSet
 [System.Serializable]
 public class ValidNeighbors
 {
-    public List<string> back;
-    public List<string> right;
-    public List<string> left;
-    public List<string> top;
-    public List<string> bottom;
+    public List<Prototype> back;
+    public List<Prototype> right;
+    public List<Prototype> left;
+    public List<Prototype> top;
+    public List<Prototype> bottom;
 
     public ValidNeighbors()
     {
-        back = new List<string>();
-        right = new List<string>();
-        left = new List<string>();
-        top = new List<string>();
-        bottom = new List<string>();
+        back = new List<Prototype>();
+        right = new List<Prototype>();
+        left = new List<Prototype>();
+        top = new List<Prototype>();
+        bottom = new List<Prototype>();
     }
 }
 

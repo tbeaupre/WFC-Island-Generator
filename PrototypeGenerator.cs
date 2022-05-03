@@ -227,19 +227,19 @@ public class PrototypeGenerator : MonoBehaviour
             foreach (Prototype proto2 in prototypes)
             {
                 if (AreSocketsCompatible(proto1.sockets.back, proto2.sockets.back))
-                    proto1.validNeighbors.back.Add(proto2.name);
+                    proto1.validNeighbors.back.Add(proto2);
                 
                 if (AreSocketsCompatible(proto1.sockets.left, proto2.sockets.left))
-                    proto1.validNeighbors.left.Add(proto2.name);
+                    proto1.validNeighbors.left.Add(proto2);
 
                 if (AreSocketsCompatible(proto1.sockets.right, proto2.sockets.right))
-                    proto1.validNeighbors.right.Add(proto2.name);
+                    proto1.validNeighbors.right.Add(proto2);
 
                 if (AreSocketsCompatible(proto1.sockets.top, proto2.sockets.bottom))
-                    proto1.validNeighbors.top.Add(proto2.name);
+                    proto1.validNeighbors.top.Add(proto2);
 
                 if (AreSocketsCompatible(proto1.sockets.bottom, proto2.sockets.top))
-                    proto1.validNeighbors.bottom.Add(proto2.name);
+                    proto1.validNeighbors.bottom.Add(proto2);
             }
         }
     }
