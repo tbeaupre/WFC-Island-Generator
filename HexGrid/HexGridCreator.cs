@@ -19,6 +19,17 @@ public class HexGridCreator : MonoBehaviour
         mg.Recalculate(GenerateHexPoints(size, triSize));
     }
 
+    public List<Triangle> GetTriangulation()
+    {
+        List<Vector3> points = GenerateHexPoints(size, triSize);
+        List<Vector2> points2d = new List<Vector2>();
+        foreach(Vector3 p in points)
+        {
+            points2d.Add(new Vector2(p.x, p.z));
+        }
+        return DelaunayTriangulation.Generate(points2d.ToArray());
+    }
+
     List<Vector3> GenerateHexPoints(int size, float triSize)
     {
         List<Vector3> result = new List<Vector3>();

@@ -7,10 +7,10 @@ public class PrototypeGenerator : MonoBehaviour
 {
     public string path;
 
-    void Start()
-    {
-        GeneratePrototypes();
-    }
+    // void Start()
+    // {
+    //     GeneratePrototypes();
+    // }
 
     List<BasePrototype> GetBasePrototypesFromFile(string path)
     {
@@ -174,7 +174,7 @@ public class PrototypeGenerator : MonoBehaviour
     }
     #endregion
 
-    void GeneratePrototypes()
+    public List<Prototype> GeneratePrototypes()
     {
         List<BasePrototype> protoPrototypes = AddTopAndBottomToBasePrototypes(GetBasePrototypesFromFile(path));
         
@@ -242,6 +242,8 @@ public class PrototypeGenerator : MonoBehaviour
                     proto1.validNeighbors.bottom.Add(proto2);
             }
         }
+
+        return prototypes;
     }
 
     bool AreSocketsCompatible(string socket1, string socket2)
