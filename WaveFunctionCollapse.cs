@@ -12,9 +12,9 @@ public enum Direction
     Bottom
 }
 
-public class WaveFunctionCollapse : MonoBehaviour
+public class WaveFunctionCollapse
 {
-    void Collapse(List<Triangle> triangles, List<Prototype> prototypes, int height)
+    public Dictionary<Triangle, Column> Collapse(List<Triangle> triangles, List<Prototype> prototypes, int height)
     {
         Dictionary<Triangle, Column> data = InitializeData(triangles, prototypes, height);
 
@@ -22,6 +22,8 @@ public class WaveFunctionCollapse : MonoBehaviour
         {
             Iterate(data, prototypes.Count);
         }
+
+        return data;
     }
 
     Dictionary<Triangle, Column> InitializeData(List<Triangle> triangles, List<Prototype> prototypes, int height)
@@ -54,6 +56,9 @@ public class WaveFunctionCollapse : MonoBehaviour
             foreach (Direction dir in directions)
             {
                 Cell neighbor = GetNeighborCell(data, currentCell, dir);
+                if (neighbor is null)
+                    continue;
+
                 List<Prototype> otherPossiblePrototypes = new List<Prototype>(neighbor.prototypes);
 
                 List<Prototype> possibleNeighbors = GetPossibleNeighbors(currentCell, dir);
@@ -76,40 +81,44 @@ public class WaveFunctionCollapse : MonoBehaviour
 
     List<Prototype> GetPossibleNeighbors(Cell cell, Direction dir)
     {
-        // Assumes cell has already been collapsed
-        switch (dir)
+        if (cell.prototypes.Count > 0)
         {
-            case Direction.Back:
-                return cell.prototypes[0].validNeighbors.back;
-            case Direction.Right:
-                return cell.prototypes[0].validNeighbors.right;
-            case Direction.Left:
-                return cell.prototypes[0].validNeighbors.left;
-            case Direction.Top:
-                return cell.prototypes[0].validNeighbors.top;
-            case Direction.Bottom:
-                return cell.prototypes[0].validNeighbors.bottom;
+            switch (dir)
+            {
+                // Assumes cell has already been collapsed
+                case Direction.Back:
+                    return cell.prototypes[0].validNeighbors.back;
+                case Direction.Right:
+                    return cell.prototypes[0].validNeighbors.right;
+                case Direction.Left:
+                    return cell.prototypes[0].validNeighbors.left;
+                case Direction.Top:
+                    return cell.prototypes[0].validNeighbors.top;
+                case Direction.Bottom:
+                    return cell.prototypes[0].validNeighbors.bottom;
+            }
         }
         return new List<Prototype>();
     }
 
     Cell GetNeighborCell(Dictionary<Triangle, Column> data, Cell cell, Direction dir)
     {
+        Triangle neighbor;
         switch (dir)
         {
             case Direction.Back:
-                Triangle neighbor = cell.triangle.backNeighbor;
-                if (neighbor != null)
+                neighbor = cell.triangle.backNeighbor;
+                if (!(neighbor is null))
                     return data[neighbor].GetCellAtY(cell.y);
                 break;
             case Direction.Right:
                 neighbor = cell.triangle.rightNeighbor;
-                if (neighbor != null)
+                if (!(neighbor is null))
                     return data[neighbor].GetCellAtY(cell.y);
                 break;
             case Direction.Left:
                 neighbor = cell.triangle.leftNeighbor;
-                if (neighbor != null)
+                if (!(neighbor is null))
                     return data[neighbor].GetCellAtY(cell.y);
                 break;
             case Direction.Top:
@@ -163,7 +172,7 @@ public class WaveFunctionCollapse : MonoBehaviour
 public class Column
 {
     Triangle triangle;
-    List<Cell> cells;
+    public List<Cell> cells;
     public int height;
 
     public Column(Triangle triangle, List<Prototype> prototypes, int height)
@@ -235,5 +244,6 @@ public class Cell
     public void Constrain(Prototype prototype)
     {
         prototypes.Remove(prototype);
+        Debug.Log(prototypes.Count);
     }
 }
