@@ -2,7 +2,7 @@
   "basePrototypes": [
     {
       "name": "CtEE0",
-      "meshName": "003",
+      "meshName": "CtEE",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -21,7 +21,7 @@
     },
     {
       "name": "CtEE1",
-      "meshName": "003",
+      "meshName": "CtEE",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -40,7 +40,7 @@
     },
     {
       "name": "CtEE2",
-      "meshName": "003",
+      "meshName": "CtEE",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -59,7 +59,7 @@
     },
     {
       "name": "CtCtE",
-      "meshName": "008",
+      "meshName": "CtCtE",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -78,7 +78,7 @@
     },
     {
       "name": "FFF",
-      "meshName": "012",
+      "meshName": "FFF",
       "isSymmetrical": "true",
       "corners": {
         "c0": {
@@ -97,7 +97,7 @@
     },
     {
       "name": "CEE",
-      "meshName": "013",
+      "meshName": "CEE",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -116,7 +116,7 @@
     },
     {
       "name": "CbCbF",
-      "meshName": "014",
+      "meshName": "CbCbF",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -135,7 +135,7 @@
     },
     {
       "name": "CCE",
-      "meshName": "016",
+      "meshName": "CCE",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -154,7 +154,7 @@
     },
     {
       "name": "CbHHt",
-      "meshName": "017",
+      "meshName": "CbHHt",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -173,7 +173,7 @@
     },
     {
       "name": "CbCbH0",
-      "meshName": "018",
+      "meshName": "CbCbH0",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -192,7 +192,7 @@
     },
     {
       "name": "CbFF",
-      "meshName": "020",
+      "meshName": "CbFF",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -211,7 +211,7 @@
     },
     {
       "name": "HtHtH",
-      "meshName": "021",
+      "meshName": "HtHtH",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -230,7 +230,7 @@
     },
     {
       "name": "HtHH0",
-      "meshName": "022",
+      "meshName": "HtHH",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -249,7 +249,7 @@
     },
     {
       "name": "HtHH1",
-      "meshName": "022",
+      "meshName": "HtHH",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -268,7 +268,7 @@
     },
     {
       "name": "CbHtH",
-      "meshName": "039",
+      "meshName": "CbHtH",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -287,7 +287,7 @@
     },
     {
       "name": "CbCbH1",
-      "meshName": "040",
+      "meshName": "CbCbH1",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
@@ -306,7 +306,7 @@
     },
     {
       "name": "CbCbH2",
-      "meshName": "042",
+      "meshName": "CbCbH2",
       "isSymmetrical": "false",
       "corners": {
         "c0": {
