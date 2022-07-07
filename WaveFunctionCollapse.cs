@@ -20,13 +20,17 @@ public class WaveFunctionCollapse
 
         while (!IsCollapsed(data))
         {
-            Iterate(data, prototypes.Count);
+            if (!Iterate(data, prototypes.Count))
+            {
+                Debug.Log("Iteration failed. Trying again...");
+                data = InitializeData(triangles, prototypes, height);
+            }
         }
 
         return data;
     }
 
-    Dictionary<Triangle, Column> InitializeData(List<Triangle> triangles, List<Prototype> prototypes, int height)
+    public Dictionary<Triangle, Column> InitializeData(List<Triangle> triangles, List<Prototype> prototypes, int height)
     {
         Dictionary<Triangle, Column> data = new Dictionary<Triangle, Column>();
         foreach (Triangle t in triangles)
@@ -36,14 +40,14 @@ public class WaveFunctionCollapse
         return data;
     }
 
-    void Iterate(Dictionary<Triangle, Column> data, int maxEntropy)
+    public bool Iterate(Dictionary<Triangle, Column> data, int maxEntropy)
     {
         Cell cell = GetMinEntropyCell(data, maxEntropy);
         cell.Collapse();
-        Propagate(data, cell);
+        return Propagate(data, cell);
     }
 
-    void Propagate(Dictionary<Triangle, Column> data, Cell cell)
+    bool Propagate(Dictionary<Triangle, Column> data, Cell cell)
     {
         Stack<Cell> stack = new Stack<Cell>();
         stack.Push(cell);
@@ -61,31 +65,34 @@ public class WaveFunctionCollapse
 
                 List<Prototype> otherPossiblePrototypes = new List<Prototype>(neighbor.prototypes);
 
-                List<Prototype> possibleNeighbors = GetPossibleNeighbors(currentCell, dir);
+                List<string> possibleNeighbors = GetPossibleNeighbors(currentCell, dir);
 
                 if (otherPossiblePrototypes.Count == 0)
                     continue;
 
                 foreach (Prototype otherPrototype in otherPossiblePrototypes)
                 {
-                    if (!possibleNeighbors.Contains(otherPrototype))
+                    if (!possibleNeighbors.Contains(otherPrototype.name))
                     {
                         neighbor.Constrain(otherPrototype);
+                        if (neighbor.prototypes.Count == 0)
+                            return false;
                         if (!stack.Contains(neighbor))
                             stack.Push(neighbor);
                     }
                 }
             }
         }
+        return true;
     }
 
-    List<Prototype> GetPossibleNeighbors(Cell cell, Direction dir)
+    List<string> GetPossibleNeighbors(Cell cell, Direction dir)
     {
         if (cell.prototypes.Count > 0)
         {
             switch (dir)
             {
-                // Assumes cell has already been collapsed
+                // Assumes cell has already been collapsed (CANNOT ASSUME THIS!)
                 case Direction.Back:
                     return cell.prototypes[0].validNeighbors.back;
                 case Direction.Right:
@@ -98,7 +105,7 @@ public class WaveFunctionCollapse
                     return cell.prototypes[0].validNeighbors.bottom;
             }
         }
-        return new List<Prototype>();
+        return new List<string>();
     }
 
     Cell GetNeighborCell(Dictionary<Triangle, Column> data, Cell cell, Direction dir)
@@ -134,7 +141,7 @@ public class WaveFunctionCollapse
         return null;
     }
 
-    bool IsCollapsed(Dictionary<Triangle, Column> data)
+    public bool IsCollapsed(Dictionary<Triangle, Column> data)
     {
         foreach(Column column in data.Values)
         {
@@ -236,6 +243,7 @@ public class Cell
 
     public void Collapse()
     {
+        Debug.Log(prototypes.Count);
         Prototype proto = prototypes[UnityEngine.Random.Range(0, prototypes.Count)];
         prototypes = new List<Prototype>();
         prototypes.Add(proto);
@@ -244,6 +252,5 @@ public class Cell
     public void Constrain(Prototype prototype)
     {
         prototypes.Remove(prototype);
-        Debug.Log(prototypes.Count);
     }
 }
