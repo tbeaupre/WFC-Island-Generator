@@ -5,11 +5,16 @@ using UnityEngine;
 
 public class Main : MonoBehaviour
 {
-    public int height = 10;
+    public int height = 2;
     PrototypeGenerator pg;
     HexGridCreator hgc;
     WaveFunctionCollapse wfc;
     CellDataToMesh cdtm;
+    Dictionary<Triangle, Column> data;
+
+    private int maxEntropy;
+    private List<Triangle> triangles;
+    private List<Prototype> prototypes;
 
     void Awake()
     {
@@ -22,9 +27,29 @@ public class Main : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        List<Prototype> prototypes = pg.GeneratePrototypes();
-        List<Triangle> triangles = hgc.GetTriangulation();
-        Dictionary<Triangle, Column> data = wfc.Collapse(triangles, prototypes, height);
+        prototypes = pg.GeneratePrototypes();
+        triangles = hgc.GetTriangulation();
+        maxEntropy = prototypes.Count;
+        data = wfc.InitializeData(triangles, prototypes, height);
+        //wfc.Collapse(triangles, prototypes, height);
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown("space"))
+        {
+            if (!wfc.IsCollapsed(data))
+            {
+                Debug.Log("Drawing");
+                wfc.Iterate(data, maxEntropy);
+                Draw(data);
+            }
+            else
+            { 
+                Debug.Log("Restarting");
+                data = wfc.InitializeData(triangles, prototypes, height);
+            }
+        }
     }
 
     void Draw(Dictionary<Triangle, Column> data)
@@ -33,7 +58,11 @@ public class Main : MonoBehaviour
         {
             foreach(Cell cell in kvp.Value.cells)
             {
-                cdtm.CreateMeshFromCell(cell);
+                if (cell.prototypes.Count == 1)
+                {
+                    Debug.Log("Drawing Mesh");
+                    cdtm.CreateMeshFromCell(cell);
+                }
             }
         }
     }
