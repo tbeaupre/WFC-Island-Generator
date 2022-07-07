@@ -10,6 +10,18 @@ public class CellDataToMesh : MonoBehaviour
         Prototype proto = cell.prototypes[0];
         string meshName = proto.meshName;
         float y = cell.y * 1.0f;
+
+        if (meshName == "")
+        {
+            Vector2 center = (cell.triangle.vertices[0] + cell.triangle.vertices[1] + cell.triangle.vertices[2]) / 3;
+            Vector3 pos = new Vector3(center.x, y, center.y);
+
+            if (proto.name.StartsWith("III"))
+                return CreateMeshObjectAtPoint("Interior", pos);
+            if (proto.name.StartsWith("EEE"))
+                return CreateMeshObjectAtPoint("Exterior", pos);
+        }
+
         Vector2 p1_2d = cell.triangle.vertices[(0 + proto.rotation) % 3];
         Vector2 p2_2d = cell.triangle.vertices[(1 + proto.rotation) % 3];
         Vector2 p3_2d = cell.triangle.vertices[(2 + proto.rotation) % 3];
@@ -69,6 +81,7 @@ public class CellDataToMesh : MonoBehaviour
 
     GameObject CreateMeshObject(string meshName)
     {
+        Debug.Log(meshName);
         GameObject go = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/" + meshName));
         return go;
     }
