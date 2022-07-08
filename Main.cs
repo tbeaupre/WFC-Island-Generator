@@ -15,6 +15,7 @@ public class Main : MonoBehaviour
     private int maxEntropy;
     private List<Triangle> triangles;
     private List<Prototype> prototypes;
+    private List<GameObject> gameObjects;
 
     void Awake()
     {
@@ -31,6 +32,7 @@ public class Main : MonoBehaviour
         triangles = hgc.GetTriangulation();
         maxEntropy = prototypes.Count;
         data = wfc.InitializeData(triangles, prototypes, height);
+        gameObjects = new List<GameObject>();
         //wfc.Collapse(triangles, prototypes, height);
     }
 
@@ -52,8 +54,18 @@ public class Main : MonoBehaviour
         }
     }
 
+    void DeleteGameObjects()
+    {
+        foreach(GameObject go in gameObjects)
+        {
+            Destroy(go);
+        }
+        gameObjects.Clear();
+    }
+
     void Draw(Dictionary<Triangle, Column> data)
     {
+        DeleteGameObjects();
         foreach(KeyValuePair<Triangle, Column> kvp in data)
         {
             foreach(Cell cell in kvp.Value.cells)
@@ -61,7 +73,7 @@ public class Main : MonoBehaviour
                 if (cell.prototypes.Count == 1)
                 {
                     Debug.Log("Drawing Mesh");
-                    cdtm.CreateMeshFromCell(cell);
+                    gameObjects.Add(cdtm.CreateMeshFromCell(cell));
                 }
             }
         }
