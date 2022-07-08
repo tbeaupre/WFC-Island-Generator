@@ -65,7 +65,7 @@ public class WaveFunctionCollapse
 
                 List<Prototype> otherPossiblePrototypes = new List<Prototype>(neighbor.prototypes);
 
-                List<string> possibleNeighbors = GetPossibleNeighbors(currentCell, dir);
+                HashSet<string> possibleNeighbors = GetPossibleNeighbors(currentCell, dir);
 
                 if (otherPossiblePrototypes.Count == 0)
                     continue;
@@ -86,26 +86,35 @@ public class WaveFunctionCollapse
         return true;
     }
 
-    List<string> GetPossibleNeighbors(Cell cell, Direction dir)
+    HashSet<string> GetPossibleNeighbors(Cell cell, Direction dir)
     {
         if (cell.prototypes.Count > 0)
         {
-            switch (dir)
+            HashSet<string> possibleNeighbors = new HashSet<string>();
+            foreach (Prototype p in cell.prototypes)
             {
-                // Assumes cell has already been collapsed (CANNOT ASSUME THIS!)
-                case Direction.Back:
-                    return cell.prototypes[0].validNeighbors.back;
-                case Direction.Right:
-                    return cell.prototypes[0].validNeighbors.right;
-                case Direction.Left:
-                    return cell.prototypes[0].validNeighbors.left;
-                case Direction.Top:
-                    return cell.prototypes[0].validNeighbors.top;
-                case Direction.Bottom:
-                    return cell.prototypes[0].validNeighbors.bottom;
+                switch (dir)
+                {
+                    case Direction.Back:
+                        possibleNeighbors.UnionWith(p.validNeighbors.back);
+                        break;
+                    case Direction.Right:
+                        possibleNeighbors.UnionWith(p.validNeighbors.right);
+                        break;
+                    case Direction.Left:
+                        possibleNeighbors.UnionWith(p.validNeighbors.left);
+                        break;
+                    case Direction.Top:
+                        possibleNeighbors.UnionWith(p.validNeighbors.top);
+                        break;
+                    case Direction.Bottom:
+                        possibleNeighbors.UnionWith(p.validNeighbors.bottom);
+                        break;
+                }
             }
+            return possibleNeighbors;
         }
-        return new List<string>();
+        return new HashSet<string>();
     }
 
     Cell GetNeighborCell(Dictionary<Triangle, Column> data, Cell cell, Direction dir)
@@ -159,11 +168,14 @@ public class WaveFunctionCollapse
         foreach (Column column in data.Values)
         {
             Cell lowestEntropyCellInColumn = column.CalcMinEntropyCell();
+            Debug.Log("LowestEntropyInCell: " + lowestEntropyCellInColumn.GetEntropy());
             int entropy = lowestEntropyCellInColumn.GetEntropy();
+            if (entropy == 1) // Ignore already collapsed cells
+                continue;
             if (entropy < lowestEntropyValue)
             {
                 lowestEntropyValue = entropy;
-                candidates = new List<Cell>();
+                candidates.Clear();
                 candidates.Add(lowestEntropyCellInColumn);
                 continue;
             }
@@ -214,7 +226,13 @@ public class Column
         Cell lowestEntropyCell = cells[0];
         foreach (Cell cell in cells)
         {
-            if (cell.GetEntropy() < lowestEntropyCell.GetEntropy())
+            // Can't include already collapsed cells.
+            if (lowestEntropyCell.GetEntropy() == 1)
+            {
+                lowestEntropyCell = cell;
+                continue;
+            }
+            if (cell.GetEntropy() > 1 && cell.GetEntropy() < lowestEntropyCell.GetEntropy())
                 lowestEntropyCell = cell;
         }
         return lowestEntropyCell;
