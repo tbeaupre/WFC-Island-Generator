@@ -1,7 +1,7 @@
 {
   "basePrototypes": [
     {
-      "name": "CtEE0",
+      "name": "CtEE",
       "meshName": "CtEE",
       "isSymmetrical": "false",
       "corners": {
@@ -15,44 +15,6 @@
         },
         "c2": {
           "left": "E",
-          "right": "E"
-        }
-      }
-    },
-    {
-      "name": "CtEE1",
-      "meshName": "CtEE",
-      "isSymmetrical": "false",
-      "corners": {
-        "c0": {
-          "left": "F",
-          "right": "Ct"
-        },
-        "c1": {
-          "left": "E",
-          "right": "F"
-        },
-        "c2": {
-          "left": "E",
-          "right": "E"
-        }
-      }
-    },
-    {
-      "name": "CtEE2",
-      "meshName": "CtEE",
-      "isSymmetrical": "false",
-      "corners": {
-        "c0": {
-          "left": "Ct",
-          "right": "F"
-        },
-        "c1": {
-          "left": "E",
-          "right": "E"
-        },
-        "c2": {
-          "left": "F",
           "right": "E"
         }
       }
@@ -63,12 +25,12 @@
       "isSymmetrical": "false",
       "corners": {
         "c0": {
-          "left": "F",
+          "left": "Ct",
           "right": "Ct"
         },
         "c1": {
           "left": "Ct",
-          "right": "F"
+          "right": "Ct"
         },
         "c2": {
           "left": "E",
@@ -77,7 +39,7 @@
       }
     },
     {
-      "name": "FFF",
+      "name": "FFF0",
       "meshName": "FFF",
       "isSymmetrical": "true",
       "corners": {
@@ -88,6 +50,25 @@
         "c1": {
           "left": "F",
           "right": "F"
+        },
+        "c2": {
+          "left": "F",
+          "right": "F"
+        }
+      }
+    },
+    {
+      "name": "FFF1",
+      "meshName": "FFF",
+      "isSymmetrical": "false",
+      "corners": {
+        "c0": {
+          "left": "Ct",
+          "right": "F"
+        },
+        "c1": {
+          "left": "F",
+          "right": "Ct"
         },
         "c2": {
           "left": "F",
@@ -148,6 +129,44 @@
         },
         "c2": {
           "left": "E",
+          "right": "E"
+        }
+      }
+    },
+    {
+      "name": "CbHH0",
+      "meshName": "CbHH",
+      "isSymmetrical": "false",
+      "corners": {
+        "c0": {
+          "left": "Cb",
+          "right": "Cb"
+        },
+        "c1": {
+          "left": "F",
+          "right": "H"
+        },
+        "c2": {
+          "left": "H",
+          "right": "F"
+        }
+      }
+    },
+    {
+      "name": "CbHH1",
+      "meshName": "CbHH",
+      "isSymmetrical": "false",
+      "corners": {
+        "c0": {
+          "left": "Cb",
+          "right": "Cb"
+        },
+        "c1": {
+          "left": "E",
+          "right": "H"
+        },
+        "c2": {
+          "left": "H",
           "right": "E"
         }
       }
@@ -357,6 +376,25 @@
         },
         "c2": {
           "left": "E",
+          "right": "E"
+        }
+      }
+    },
+    {
+      "name": "EEE2",
+      "meshName": "",
+      "isSymmetrical": "false",
+      "corners": {
+        "c0": {
+          "left": "F",
+          "right": "F"
+        },
+        "c1": {
+          "left": "E",
+          "right": "F"
+        },
+        "c2": {
+          "left": "F",
           "right": "E"
         }
       }
