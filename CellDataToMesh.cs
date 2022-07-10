@@ -8,6 +8,10 @@ public class CellDataToMesh : MonoBehaviour
     public GameObject CreateMeshFromCell(Cell cell)
     {
         GameObject parent = new GameObject();
+        if (cell.prototypes.Count == 1)
+            parent.name = "Collapsed: " + cell.prototypes[0].name;
+        else if (cell.prototypes.Count == 0)
+            parent.name = "FAILED";
         parent.transform.position = GetTriangleCenter(cell.triangle, cell.y * 1.0f);
 
         foreach (Prototype p in cell.prototypes)
@@ -31,19 +35,21 @@ public class CellDataToMesh : MonoBehaviour
         {
             Vector3 pos = GetTriangleCenter(triangle, y);
 
+            GameObject go;
             if (proto.name.StartsWith("III"))
-                return CreateMeshObjectAtPoint("Interior", pos, parent);
-            if (proto.name.StartsWith("EEE"))
-                return CreateMeshObjectAtPoint("Exterior", pos, parent);
+                go = CreateMeshObjectAtPoint("Interior", new Vector3((triangle.vertices[1].x + pos.x) / 2, y, (triangle.vertices[1].y + pos.z) / 2), parent);
+            else
+                go = CreateMeshObjectAtPoint("Exterior", new Vector3((triangle.vertices[0].x + pos.x) / 2, y, (triangle.vertices[0].y + pos.z) / 2), parent);
+            go.name = proto.name;
+            return go;
         }
 
         Vector2 p1_2d = triangle.vertices[(0 + proto.rotation) % 3];
         Vector2 p2_2d = triangle.vertices[(1 + proto.rotation) % 3];
         Vector2 p3_2d = triangle.vertices[(2 + proto.rotation) % 3];
-        // Swap vertex order so triangles render face up
-        Vector3 p3 = new Vector3(p1_2d.x, y, p1_2d.y);
+        Vector3 p1 = new Vector3(p1_2d.x, y, p1_2d.y);
         Vector3 p2 = new Vector3(p2_2d.x, y, p2_2d.y);
-        Vector3 p1 = new Vector3(p3_2d.x, y, p3_2d.y);
+        Vector3 p3 = new Vector3(p3_2d.x, y, p3_2d.y);
         return CreateMeshObjectAtPoints(meshName, p1, p2, p3, parent);
     }
 
