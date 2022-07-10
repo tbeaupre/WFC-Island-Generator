@@ -54,6 +54,25 @@ public class SocketSet
     public string left;
     public string top;
     public string bottom;
+
+    public string GetSocketInDirection(Direction dir)
+    {
+        switch (dir)
+        {
+            case Direction.Back:
+                return back;
+            case Direction.Right:
+                return right;
+            case Direction.Left:
+                return left;
+            case Direction.Top:
+                return top;
+            case Direction.Bottom:
+                return bottom;
+            default:
+                return top;
+        }
+    } 
 }
 
 [System.Serializable]
@@ -72,6 +91,36 @@ public class ValidNeighbors
         left = new List<string>();
         top = new List<string>();
         bottom = new List<string>();
+    }
+
+    public string ToString()
+    {
+        string result = "Back Neighbors: ";
+        foreach (string neighbor in back)
+        {
+            result += neighbor + ", ";
+        }
+        result += "\nRight Neighbors: ";
+        foreach (string neighbor in right)
+        {
+            result += neighbor + ", ";
+        }
+        result += "\nLeft Neighbors: ";
+        foreach (string neighbor in left)
+        {
+            result += neighbor + ", ";
+        }
+        result += "\nTop Neighbors: ";
+        foreach (string neighbor in top)
+        {
+            result += neighbor + ", ";
+        }
+        result += "\nBottom Neighbors: ";
+        foreach (string neighbor in bottom)
+        {
+            result += neighbor + ", ";
+        }
+        return result;
     }
 }
 
