@@ -12,6 +12,8 @@ public enum Direction
     Bottom
 }
 
+// TODO: Consider edge cells as having lower entropy. Work from outside in.
+// TODO: Make edge cells FFF? Should make the island look a bit nicer.
 public class WaveFunctionCollapse
 {
     public Dictionary<Triangle, Column> Collapse(List<Triangle> triangles, List<Prototype> prototypes, int height)
@@ -88,33 +90,29 @@ public class WaveFunctionCollapse
 
     HashSet<string> GetPossibleNeighbors(Cell cell, Direction dir)
     {
-        if (cell.prototypes.Count > 0)
+        HashSet<string> possibleNeighbors = new HashSet<string>();
+        foreach (Prototype p in cell.prototypes)
         {
-            HashSet<string> possibleNeighbors = new HashSet<string>();
-            foreach (Prototype p in cell.prototypes)
+            switch (dir)
             {
-                switch (dir)
-                {
-                    case Direction.Back:
-                        possibleNeighbors.UnionWith(p.validNeighbors.back);
-                        break;
-                    case Direction.Right:
-                        possibleNeighbors.UnionWith(p.validNeighbors.right);
-                        break;
-                    case Direction.Left:
-                        possibleNeighbors.UnionWith(p.validNeighbors.left);
-                        break;
-                    case Direction.Top:
-                        possibleNeighbors.UnionWith(p.validNeighbors.top);
-                        break;
-                    case Direction.Bottom:
-                        possibleNeighbors.UnionWith(p.validNeighbors.bottom);
-                        break;
-                }
+                case Direction.Back:
+                    possibleNeighbors.UnionWith(p.validNeighbors.back);
+                    break;
+                case Direction.Right:
+                    possibleNeighbors.UnionWith(p.validNeighbors.right);
+                    break;
+                case Direction.Left:
+                    possibleNeighbors.UnionWith(p.validNeighbors.left);
+                    break;
+                case Direction.Top:
+                    possibleNeighbors.UnionWith(p.validNeighbors.top);
+                    break;
+                case Direction.Bottom:
+                    possibleNeighbors.UnionWith(p.validNeighbors.bottom);
+                    break;
             }
-            return possibleNeighbors;
         }
-        return new HashSet<string>();
+        return possibleNeighbors;
     }
 
     Cell GetNeighborCell(Dictionary<Triangle, Column> data, Cell cell, Direction dir)
@@ -168,7 +166,7 @@ public class WaveFunctionCollapse
         foreach (Column column in data.Values)
         {
             Cell lowestEntropyCellInColumn = column.CalcMinEntropyCell();
-            Debug.Log("LowestEntropyInCell: " + lowestEntropyCellInColumn.GetEntropy());
+            //Debug.Log("LowestEntropyInCell: " + lowestEntropyCellInColumn.GetEntropy());
             int entropy = lowestEntropyCellInColumn.GetEntropy();
             if (entropy == 1) // Ignore already collapsed cells
                 continue;
@@ -261,8 +259,9 @@ public class Cell
 
     public void Collapse()
     {
-        Debug.Log(prototypes.Count);
         Prototype proto = prototypes[UnityEngine.Random.Range(0, prototypes.Count)];
+        Debug.Log("Selected prototype: " + proto.name);
+        Debug.Log(proto.validNeighbors.ToString());
         prototypes = new List<Prototype>();
         prototypes.Add(proto);
     }
