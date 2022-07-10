@@ -10,6 +10,7 @@ public class Main : MonoBehaviour
     HexGridCreator hgc;
     WaveFunctionCollapse wfc;
     CellDataToMesh cdtm;
+    HexGrid2 hg2;
     Dictionary<Triangle, Column> data;
 
     private int maxEntropy;
@@ -19,8 +20,9 @@ public class Main : MonoBehaviour
 
     void Awake()
     {
-        pg = GetComponent<PrototypeGenerator>();
+        pg = new PrototypeGenerator();
         hgc = GetComponent<HexGridCreator>();
+        hg2 = new HexGrid2();
         wfc = new WaveFunctionCollapse();
         cdtm = GetComponent<CellDataToMesh>();
     }
@@ -28,8 +30,8 @@ public class Main : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        prototypes = pg.GeneratePrototypes();
-        triangles = hgc.GetTriangulation();
+        prototypes = pg.GeneratePrototypes("C:\\Users\\tyler\\Documents\\GitHub\\Delaunay Triangulation\\Assets\\PrototypeData.json");
+        triangles = hg2.GetTriangulation(5, 2); // hgc.GetTriangulation();
         maxEntropy = prototypes.Count;
         data = wfc.InitializeData(triangles, prototypes, height);
         gameObjects = new List<GameObject>();
@@ -40,25 +42,8 @@ public class Main : MonoBehaviour
     {
         if (Input.GetKeyDown("space"))
         {
-            if (!wfc.IsCollapsed(data))
-            {
-                Debug.Log("Drawing");
-                if (wfc.Iterate(data, maxEntropy))
-                {
-                    Draw(data);
-                }
-                else
-                {
-                    Debug.Log("Failed");
-                    Draw(data);
-                    data = wfc.InitializeData(triangles, prototypes, height);
-                }
-            }
-            else
-            { 
-                Debug.Log("Restarting");
-                data = wfc.InitializeData(triangles, prototypes, height);
-            }
+            data = wfc.Collapse(triangles, prototypes, height);
+            Draw(data);
         }
     }
 
