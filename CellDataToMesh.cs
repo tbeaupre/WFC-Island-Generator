@@ -7,42 +7,58 @@ public class CellDataToMesh : MonoBehaviour
 {
     public GameObject CreateMeshFromCell(Cell cell)
     {
-        Prototype proto = cell.prototypes[0];
+        GameObject parent = new GameObject();
+        parent.transform.position = GetTriangleCenter(cell.triangle, cell.y * 1.0f);
+
+        foreach (Prototype p in cell.prototypes)
+        {
+            CreateMeshFromPrototype(p, cell.triangle, cell.y, parent);
+        }
+        return parent;
+    }
+
+    Vector3 GetTriangleCenter(Triangle triangle, float y)
+    {
+            Vector2 center = (triangle.vertices[0] + triangle.vertices[1] + triangle.vertices[2]) / 3;
+            return new Vector3(center.x, y, center.y);
+    }
+
+    GameObject CreateMeshFromPrototype(Prototype proto, Triangle triangle, float y, GameObject parent)
+    {
         string meshName = proto.meshName;
-        float y = cell.y * 1.0f;
 
         if (meshName == "")
         {
-            Vector2 center = (cell.triangle.vertices[0] + cell.triangle.vertices[1] + cell.triangle.vertices[2]) / 3;
-            Vector3 pos = new Vector3(center.x, y, center.y);
+            Vector3 pos = GetTriangleCenter(triangle, y);
 
             if (proto.name.StartsWith("III"))
-                return CreateMeshObjectAtPoint("Interior", pos);
+                return CreateMeshObjectAtPoint("Interior", pos, parent);
             if (proto.name.StartsWith("EEE"))
-                return CreateMeshObjectAtPoint("Exterior", pos);
+                return CreateMeshObjectAtPoint("Exterior", pos, parent);
         }
 
-        Vector2 p1_2d = cell.triangle.vertices[(0 + proto.rotation) % 3];
-        Vector2 p2_2d = cell.triangle.vertices[(1 + proto.rotation) % 3];
-        Vector2 p3_2d = cell.triangle.vertices[(2 + proto.rotation) % 3];
-        Vector3 p1 = new Vector3(p1_2d.x, y, p1_2d.y);
+        Vector2 p1_2d = triangle.vertices[(0 + proto.rotation) % 3];
+        Vector2 p2_2d = triangle.vertices[(1 + proto.rotation) % 3];
+        Vector2 p3_2d = triangle.vertices[(2 + proto.rotation) % 3];
+        // Swap vertex order so triangles render face up
+        Vector3 p3 = new Vector3(p1_2d.x, y, p1_2d.y);
         Vector3 p2 = new Vector3(p2_2d.x, y, p2_2d.y);
-        Vector3 p3 = new Vector3(p3_2d.x, y, p3_2d.y);
-        return CreateMeshObjectAtPoints(meshName, p1, p2, p3);
+        Vector3 p1 = new Vector3(p3_2d.x, y, p3_2d.y);
+        return CreateMeshObjectAtPoints(meshName, p1, p2, p3, parent);
     }
 
-    public GameObject CreateMeshObjectAtPoints(string meshName, Vector3 p1, Vector3 p2, Vector3 p3)
+    public GameObject CreateMeshObjectAtPoints(string meshName, Vector3 p1, Vector3 p2, Vector3 p3, GameObject parent)
     {
-        GameObject go = CreateMeshObjectAtPoints(meshName, p1, p2);
+        GameObject go = CreateMeshObjectAtPoints(meshName, p1, p2, parent);
         MeshTransformer mt = go.GetComponent<MeshTransformer>();
         mt.ScaleShearTowardsPoint(p3);
 
         return go;
     }
 
-    public GameObject CreateMeshObjectAtPoints(string meshName, Vector3 p1, Vector3 p2)
+    public GameObject CreateMeshObjectAtPoints(string meshName, Vector3 p1, Vector3 p2, GameObject parent)
     {
-        GameObject go = CreateMeshObjectAtPoint(meshName, p1);
+        GameObject go = CreateMeshObjectAtPoint(meshName, p1, parent);
         MeshTransformer mt = go.AddComponent<MeshTransformer>();
         mt.Init();
         mt.StretchXTowardsPoint(p2);
@@ -50,39 +66,16 @@ public class CellDataToMesh : MonoBehaviour
         return go;
     }
 
-    public GameObject CreateMeshObjectAtPoint(string meshName, Vector3 position)
+    public GameObject CreateMeshObjectAtPoint(string meshName, Vector3 position, GameObject parent)
     {
-        GameObject go = CreateMeshObject(meshName);
+        GameObject go = CreateMeshObject(meshName, parent);
         go.transform.position = position;
         return go;
     }
 
-    GameObject CreateMeshObjectWithTransform(string meshName, int rotation)
+    GameObject CreateMeshObject(string meshName, GameObject parent)
     {
-        GameObject go = CreateMeshObject(meshName);
-        RotateObject(go, rotation);
-        return go;
-    }
-
-    void RotateObject(GameObject go, int rotation)
-    {
-        switch (rotation)
-        {
-            case 0:
-                return;
-            case 1:
-                go.transform.Rotate(new Vector3(0, 120, 0));
-                break;
-            case 2:
-                go.transform.Rotate(new Vector3(0, 240, 0));
-                break;
-        }
-    }
-
-    GameObject CreateMeshObject(string meshName)
-    {
-        Debug.Log(meshName);
-        GameObject go = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/" + meshName));
+        GameObject go = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/" + meshName), parent.transform);
         return go;
     }
 }
