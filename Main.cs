@@ -43,8 +43,16 @@ public class Main : MonoBehaviour
             if (!wfc.IsCollapsed(data))
             {
                 Debug.Log("Drawing");
-                wfc.Iterate(data, maxEntropy);
-                Draw(data);
+                if (wfc.Iterate(data, maxEntropy))
+                {
+                    Draw(data);
+                }
+                else
+                {
+                    Debug.Log("Failed");
+                    Draw(data);
+                    data = wfc.InitializeData(triangles, prototypes, height);
+                }
             }
             else
             { 
@@ -70,11 +78,7 @@ public class Main : MonoBehaviour
         {
             foreach(Cell cell in kvp.Value.cells)
             {
-                if (cell.prototypes.Count == 1)
-                {
-                    Debug.Log("Drawing Mesh");
-                    gameObjects.Add(cdtm.CreateMeshFromCell(cell));
-                }
+                gameObjects.Add(cdtm.CreateMeshFromCell(cell));
             }
         }
     }
