@@ -3,10 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PrototypeGenerator : MonoBehaviour
+public class PrototypeGenerator
 {
-    public string path;
-    
     List<BasePrototype> GetBasePrototypesFromFile(string path)
     {
         if (!File.Exists(path))
@@ -105,6 +103,7 @@ public class PrototypeGenerator : MonoBehaviour
         result.sockets.top = GetSocketForVerticalFace(sockets, ref socketCount, p.corners.c0.top, p.corners.c1.top, p.corners.c2.top);
         result.sockets.bottom = GetSocketForVerticalFace(sockets, ref socketCount, p.corners.c0.bottom, p.corners.c1.bottom, p.corners.c2.bottom);
 
+        Debug.Log(result.name + " back: " + result.sockets.back + ", right: " + result.sockets.right + ", left: " + result.sockets.left);
         return result;
     }
 
@@ -169,7 +168,7 @@ public class PrototypeGenerator : MonoBehaviour
     }
     #endregion
 
-    public List<Prototype> GeneratePrototypes()
+    public List<Prototype> GeneratePrototypes(string path)
     {
         List<BasePrototype> protoPrototypes = AddTopAndBottomToBasePrototypes(GetBasePrototypesFromFile(path));
         
@@ -212,6 +211,9 @@ public class PrototypeGenerator : MonoBehaviour
             sockets2.bottom = GetRotatedVerticalSocketString(p1.sockets.bottom);
             p2.sockets = sockets2;
             prototypes.Add(p2);
+            
+            Debug.Log(p1.name + " back: " + p1.sockets.back + ", right: " + p1.sockets.right + ", left: " + p1.sockets.left);
+            Debug.Log(p2.name + " back: " + p2.sockets.back + ", right: " + p2.sockets.right + ", left: " + p2.sockets.left);
         }
 
         Debug.Log("Final Prototype Count: " + prototypes.Count);
@@ -241,7 +243,7 @@ public class PrototypeGenerator : MonoBehaviour
         return prototypes;
     }
 
-    bool AreSocketsCompatible(string socket1, string socket2)
+    public static bool AreSocketsCompatible(string socket1, string socket2)
     {
         bool isSymmetrical = socket1.EndsWith("s");
         bool isVertical = socket1.StartsWith("v");
