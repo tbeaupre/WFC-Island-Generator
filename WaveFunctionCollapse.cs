@@ -20,6 +20,12 @@ public class WaveFunctionCollapse
     {
         Dictionary<Triangle, Column> data = InitializeData(triangles, prototypes, height);
 
+        while (!CreateOceans(data) && !CreateSkies(data, height))
+        {
+            Debug.Log("Failed to initialize oceans. Trying again...");
+            data = InitializeData(triangles, prototypes, height);
+        }
+
         while (!IsCollapsed(data))
         {
             if (!Iterate(data, prototypes.Count))
@@ -40,6 +46,38 @@ public class WaveFunctionCollapse
             data.Add(t, new Column(t, prototypes, height));
         }
         return data;
+    }
+
+    bool CreateOceans(Dictionary<Triangle, Column> data)
+    {
+        foreach (Column column in data.Values)
+        {
+            Cell bottomCell = column.GetCellAtY(0);
+            Direction[] sides = new Direction[] { Direction.Back, Direction.Right, Direction.Left };
+            foreach (Direction dir in sides)
+            {
+                if (GetNeighborCell(data, bottomCell, dir) is null)
+                {
+                    bottomCell.CollapseTo("EEE0");
+                    if (!Propagate(data, bottomCell))
+                        return false;
+                    break;
+                }
+            }
+        }
+        return true;
+    }
+
+    bool CreateSkies(Dictionary<Triangle, Column> data, int height)
+    {
+        foreach (Column column in data.Values)
+        {
+            Cell topCell = column.GetCellAtY(height - 1);
+            topCell.CollapseTo("EEE0");
+            if (!Propagate(data, topCell))
+                return false;
+        }
+        return true;
     }
 
     public bool Iterate(Dictionary<Triangle, Column> data, int maxEntropy)
@@ -262,6 +300,13 @@ public class Cell
         Prototype proto = prototypes[UnityEngine.Random.Range(0, prototypes.Count)];
         Debug.Log("Selected prototype: " + proto.name);
         Debug.Log(proto.validNeighbors.ToString());
+        prototypes = new List<Prototype>();
+        prototypes.Add(proto);
+    }
+
+    public void CollapseTo(string prototypeName)
+    {
+        Prototype proto = prototypes.Find(p => p.name == prototypeName);
         prototypes = new List<Prototype>();
         prototypes.Add(proto);
     }
