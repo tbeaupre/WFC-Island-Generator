@@ -4,53 +4,41 @@ using UnityEngine;
 
 public class HexGrid2
 {
-    public List<Triangle> GetTriangulation(int size, float triSize)
+    public List<Triangle> GetTriangulation(int sideLength, float triSize)
     {
         float triHeight = Mathf.Sin(60 * Mathf.Deg2Rad) * triSize;
         List<Triangle> triangles = new List<Triangle>();
+        int size = sideLength * 2 + 1;
 
         Vector2[,] vertices = new Vector2[size, size];
         for (int j = 0; j < size; ++j)
         {
             for (int i = 0; i < size; ++i)
             {
-                // float xOffset = (j % 2 == 1) ? 0.5f * triSize : 0;
-                float x = (i + 0.5f * j) * triSize;// + xOffset;
+                float x = (i + 0.5f * j) * triSize;
                 float y = j * triHeight;
                 vertices[i, j] = new Vector2(x, y);
             }
         }
 
-        for (int j = 0; j < (size - 1) * 2 ; ++j)
+        // Create first half of hexagon
+        for (int j = 0; j < sideLength; ++j)
         {
-            int y = j / 2;
-            if (j % 2 == 0)
-            {
-                for (int i = 0; i < size - 1; ++i)
-                {
-                    Vector2 p1 = vertices[i, y];
-                    Vector2 p2 = vertices[i + 1, y];
-                    Vector2 p3 = vertices[i, y + 1];
-                    triangles.Add(new Triangle(new List<Vector2>() { p3, p2, p1 }));
-                }
-            }
-            else
-            {
-                ++y;
-                for (int i = 0; i < size  -1; ++i)
-                {
-                    Vector2 p1 = vertices[i + 1, y];
-                    Vector2 p2 = vertices[i, y];
-                    Vector2 p3 = vertices[i + 1, y - 1];
-                    triangles.Add(new Triangle(new List<Vector2>() { p3, p2, p1 }));
-                }
-            }
+            triangles.AddRange(CreateRow(vertices, sideLength - j, j, sideLength + j));
+            triangles.AddRange(CreateUpsideDownRow(vertices, sideLength - j, j, sideLength + j + 1));
+            Debug.Log(triangles.Count);
+        }
+
+        for (int j = sideLength; j < sideLength * 2; ++j)
+        {
+            triangles.AddRange(CreateUpsideDownRow(vertices, 1, j, 3 * sideLength - j - 1));
+            triangles.AddRange(CreateRow(vertices, 0, j, 3 * sideLength - j));
         }
 
         // Set up Triangle neighbor lists
-        foreach(Triangle t1 in triangles)
+        foreach (Triangle t1 in triangles)
         {
-            foreach(Triangle t2 in triangles)
+            foreach (Triangle t2 in triangles)
             {
                 if (t1 == t2)
                     continue;
@@ -67,5 +55,36 @@ public class HexGrid2
         }
 
         return triangles;
+    }
+    List<Triangle> CreateRow(Vector2[,] vertices, int x, int y, int width)
+    {
+        List<Triangle> result = new List<Triangle>();
+
+        for (int i = x; i < x + width; ++i)
+        {
+            // Debug.Log("(" + i + ", " + y + "); (" + (i + 1) + ", " + y + "); (" + i + ", " + (y + 1) + "); ");
+            Vector2 p1 = vertices[i, y];
+            Vector2 p2 = vertices[i + 1, y];
+            Vector2 p3 = vertices[i, y + 1];
+            result.Add(new Triangle(new List<Vector2>() { p3, p2, p1 }));
+        }
+
+        return result;
+    }
+
+    List<Triangle> CreateUpsideDownRow(Vector2[,] vertices, int x, int y, int width)
+    {
+        List<Triangle> result = new List<Triangle>();
+        // Debug.Log(x + ", " + y + ", " + width);
+        for (int i = x; i < x + width; ++i)
+        {
+            // Debug.Log("(" + i + ", " + (y+1) + "); (" + (i - 1) + ", " + (y+1) + "); (" + i + ", " + y + "); ");
+            Vector2 p1 = vertices[i, y + 1];
+            Vector2 p2 = vertices[i - 1, y + 1];
+            Vector2 p3 = vertices[i, y];
+            result.Add(new Triangle(new List<Vector2>() { p3, p2, p1 }));
+        }
+
+        return result;
     }
 }
