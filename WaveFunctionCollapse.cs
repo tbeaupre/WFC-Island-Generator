@@ -20,7 +20,7 @@ public class WaveFunctionCollapse
     {
         Dictionary<Triangle, Column> data = InitializeData(triangles, prototypes, height);
 
-        while (!CreateOceans(data) && !CreateSkies(data, height))
+        while (!CreateOceans(data) & !CreateSkies(data, height))
         {
             Debug.Log("Failed to initialize oceans. Trying again...");
             data = InitializeData(triangles, prototypes, height);
