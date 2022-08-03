@@ -20,12 +20,6 @@ public class WaveFunctionCollapse
     {
         Dictionary<Triangle, Column> data = InitializeData(triangles, prototypes, height);
 
-        while (!CreateOceans(data) & !CreateSkies(data, height))
-        {
-            Debug.Log("Failed to initialize oceans. Trying again...");
-            data = InitializeData(triangles, prototypes, height);
-        }
-
         while (!IsCollapsed(data))
         {
             if (!Iterate(data, prototypes.Count))
@@ -40,12 +34,34 @@ public class WaveFunctionCollapse
 
     public Dictionary<Triangle, Column> InitializeData(List<Triangle> triangles, List<Prototype> prototypes, int height)
     {
+        Dictionary<Triangle, Column> data = InitializeDataStructure(triangles, prototypes, height);
+
+        while (!SetUpOceansAndSkies(data, height))
+        {
+            Debug.Log("Failed to initialize oceans and skies. Trying again...");
+            data = InitializeDataStructure(triangles, prototypes, height);
+        }
+
+        return data;
+    }
+
+    Dictionary<Triangle, Column> InitializeDataStructure(List<Triangle> triangles, List<Prototype> prototypes, int height)
+    {
         Dictionary<Triangle, Column> data = new Dictionary<Triangle, Column>();
         foreach (Triangle t in triangles)
         {
             data.Add(t, new Column(t, prototypes, height));
         }
         return data;
+    }
+
+    bool SetUpOceansAndSkies(Dictionary<Triangle, Column> data, int height)
+    {
+        if (!CreateOceans(data))
+            return false;
+        if (!CreateSkies(data, height))
+            return false;
+        return true;
     }
 
     bool CreateOceans(Dictionary<Triangle, Column> data)
@@ -58,7 +74,7 @@ public class WaveFunctionCollapse
             {
                 if (GetNeighborCell(data, bottomCell, dir) is null)
                 {
-                    bottomCell.CollapseTo("EEE0");
+                    bottomCell.CollapseTo("EEE");
                     if (!Propagate(data, bottomCell))
                         return false;
                     break;
@@ -73,7 +89,7 @@ public class WaveFunctionCollapse
         foreach (Column column in data.Values)
         {
             Cell topCell = column.GetCellAtY(height - 1);
-            topCell.CollapseTo("EEE0");
+            topCell.CollapseTo("EEE");
             if (!Propagate(data, topCell))
                 return false;
         }
@@ -298,8 +314,6 @@ public class Cell
     public void Collapse()
     {
         Prototype proto = prototypes[UnityEngine.Random.Range(0, prototypes.Count)];
-        Debug.Log("Selected prototype: " + proto.name);
-        Debug.Log(proto.validNeighbors.ToString());
         prototypes = new List<Prototype>();
         prototypes.Add(proto);
     }
