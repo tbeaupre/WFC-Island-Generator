@@ -37,6 +37,12 @@ public class Corner
 #endregion
 
 [System.Serializable]
+public class PrototypeSet
+{
+    public Prototype[] modules;
+}
+
+[System.Serializable]
 public class Prototype
 {
     public string name;

@@ -6,8 +6,8 @@ using UnityEngine;
 public class Main : MonoBehaviour
 {
     public int height = 2;
-    PrototypeGenerator pg;
-    HexGridCreator hgc;
+    public int sideLength = 5;
+    public int triangleSize = 2;
     WaveFunctionCollapse wfc;
     CellDataToMesh cdtm;
     HexGrid2 hg2;
@@ -20,8 +20,6 @@ public class Main : MonoBehaviour
 
     void Awake()
     {
-        pg = new PrototypeGenerator();
-        hgc = GetComponent<HexGridCreator>();
         hg2 = new HexGrid2();
         wfc = new WaveFunctionCollapse();
         cdtm = GetComponent<CellDataToMesh>();
@@ -30,12 +28,13 @@ public class Main : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        prototypes = pg.GeneratePrototypes("C:\\Users\\tyler\\Documents\\GitHub\\Delaunay Triangulation\\Assets\\PrototypeData.json");
-        triangles = hg2.GetTriangulation(5, 2); // hgc.GetTriangulation();
+        prototypes = ModuleLoader.GetPrototypesFromFile();
+        triangles = hg2.GetTriangulation(sideLength, triangleSize);
         maxEntropy = prototypes.Count;
-        data = wfc.InitializeData(triangles, prototypes, height);
         gameObjects = new List<GameObject>();
-        //wfc.Collapse(triangles, prototypes, height);
+
+        data = wfc.Collapse(triangles, prototypes, height);
+        Draw(data);
     }
 
     void Update()
