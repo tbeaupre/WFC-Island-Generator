@@ -5,6 +5,20 @@ using UnityEditor;
 
 public class CellDataToMesh : MonoBehaviour
 {
+    private Dictionary<string, GameObject> namePrefabMap = new Dictionary<string, GameObject>();
+
+    private void Awake()
+    {
+        GameObject parent = Resources.Load<GameObject>("Meshes/modules");
+        foreach (Transform child in parent.transform)
+        {
+            namePrefabMap.Add(child.name, child.gameObject);
+        }
+        namePrefabMap.Add("Interior", Resources.Load<GameObject>("Prefabs/Interior"));
+        namePrefabMap.Add("Exterior", Resources.Load<GameObject>("Prefabs/Exterior"));
+        Debug.Log($"namePrefabMap count: {namePrefabMap.Count}");
+    }
+
     public GameObject CreateMeshFromCell(Cell cell)
     {
         GameObject parent = new GameObject();
@@ -33,6 +47,7 @@ public class CellDataToMesh : MonoBehaviour
 
         if (meshName == "")
         {
+            return null;
             Vector3 pos = GetTriangleCenter(triangle, y);
 
             GameObject go;
@@ -50,6 +65,7 @@ public class CellDataToMesh : MonoBehaviour
         Vector3 p1 = new Vector3(p1_2d.x, y, p1_2d.y);
         Vector3 p2 = new Vector3(p2_2d.x, y, p2_2d.y);
         Vector3 p3 = new Vector3(p3_2d.x, y, p3_2d.y);
+
         return CreateMeshObjectAtPoints(meshName, p1, p2, p3, parent);
     }
 
@@ -81,7 +97,7 @@ public class CellDataToMesh : MonoBehaviour
 
     GameObject CreateMeshObject(string meshName, GameObject parent)
     {
-        GameObject go = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/" + meshName), parent.transform);
+        GameObject go = Instantiate(namePrefabMap[meshName], parent.transform);
         return go;
     }
 }
