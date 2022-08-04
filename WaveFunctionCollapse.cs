@@ -74,7 +74,7 @@ public class WaveFunctionCollapse
             {
                 if (GetNeighborCell(data, bottomCell, dir) is null)
                 {
-                    bottomCell.CollapseTo("EEE");
+                    bottomCell.CollapseTo("OOO");
                     if (!Propagate(data, bottomCell))
                         return false;
                     break;
