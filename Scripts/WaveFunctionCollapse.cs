@@ -293,6 +293,8 @@ public class Column
 
 public class Cell
 {
+    const int TRAVERSAL_MULTIPLIER = 5;
+
     public Triangle triangle;
     public Column column;
     public List<Prototype> prototypes;
@@ -313,9 +315,27 @@ public class Cell
 
     public void Collapse()
     {
-        Prototype proto = prototypes[UnityEngine.Random.Range(0, prototypes.Count)];
-        prototypes = new List<Prototype>();
-        prototypes.Add(proto);
+        //Prototype proto = prototypes[UnityEngine.Random.Range(0, prototypes.Count)];
+        //prototypes = new List<Prototype>();
+        //prototypes.Add(proto);
+
+        int sumOfWeights = 0;
+        foreach (Prototype p in prototypes)
+        {
+            sumOfWeights += (1 + (p.traversalScore * TRAVERSAL_MULTIPLIER));
+        }
+        int target = UnityEngine.Random.Range(0, sumOfWeights);
+        int currentValue = 0;
+        foreach (Prototype p in prototypes)
+        {
+            currentValue += 1 + (p.traversalScore * TRAVERSAL_MULTIPLIER);
+            if (currentValue > target)
+            {
+                prototypes = new List<Prototype>();
+                prototypes.Add(p);
+                return;
+            }
+        }
     }
 
     public void CollapseTo(string prototypeName)

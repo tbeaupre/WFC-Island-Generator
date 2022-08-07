@@ -45,9 +45,9 @@ public class PrototypeGenerator
             return "Ht";
 
         if (corner.left == "C" || corner.right == "C")
-            return "C";
+            return "I";
         if (corner.left == "Cb" || corner.right == "Cb")
-            return "C";
+            return "I";
 
         if (corner.left == "I" && corner.right == "I")
             return "I";
@@ -64,9 +64,9 @@ public class PrototypeGenerator
             return "Ht";
 
         if (corner.left == "Ct" || corner.right == "Ct")
-            return "C";
+            return "I";
         if (corner.left == "C" || corner.right == "C")
-            return "C";
+            return "I";
 
         if (corner.left == "E" && corner.right == "E")
             return "E";
@@ -238,6 +238,7 @@ public class PrototypeGenerator
                 if (AreSocketsCompatible(proto1.sockets.bottom, proto2.sockets.top))
                     proto1.validNeighbors.bottom.Add(proto2.name);
             }
+            Debug.Log($"{proto1.name}: {proto1.validNeighbors.ToString()}");
         }
 
         return prototypes;

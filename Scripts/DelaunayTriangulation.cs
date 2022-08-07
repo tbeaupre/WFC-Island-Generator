@@ -92,6 +92,8 @@ public class DelaunayTriangulation
             }
         }
 
+        // TODO: Flip triangles to CW from CCW
+
         // Set up Triangle neighbor lists
         foreach(Triangle t1 in triangulation)
         {
@@ -111,11 +113,11 @@ public class DelaunayTriangulation
             }
         }
 
-        Debug.Log(triangulation.Count);
-        foreach(Triangle t in triangulation)
-        {
-            Debug.Log(t.ToString());
-        }
+        // Debug.Log(triangulation.Count);
+        // foreach(Triangle t in triangulation)
+        // {
+        //     Debug.Log(t.ToString());
+        // }
 
         return triangulation;
     }

@@ -48,6 +48,7 @@ public class Prototype
     public string name;
     public string meshName;
     public int rotation;
+    public int traversalScore;
     public SocketSet sockets;
     public ValidNeighbors validNeighbors;
 }
