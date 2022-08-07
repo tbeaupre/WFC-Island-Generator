@@ -26,11 +26,11 @@ public class CellDataToMesh : MonoBehaviour
             parent.name = "Collapsed: " + cell.prototypes[0].name;
         else if (cell.prototypes.Count == 0)
             parent.name = "FAILED";
-        parent.transform.position = GetTriangleCenter(cell.triangle, cell.y * 1.0f);
+        parent.transform.position = GetTriangleCenter(cell.tile.ToTriangle(), cell.tile.y * 1.0f);
 
         foreach (Prototype p in cell.prototypes)
         {
-            CreateMeshFromPrototype(p, cell.triangle, cell.y, parent);
+            CreateMeshFromPrototype(p, cell.tile.ToTriangle(), cell.tile.y, parent);
         }
         return parent;
     }

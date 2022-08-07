@@ -16,66 +16,73 @@ public enum Direction
 // TODO: Make edge cells FFF? Should make the island look a bit nicer.
 public class WaveFunctionCollapse
 {
-    public Dictionary<Triangle, Column> Collapse(List<Triangle> triangles, List<Prototype> prototypes, int height)
-    {
-        Dictionary<Triangle, Column> data = InitializeData(triangles, prototypes, height);
+    Dictionary<Tile, Cell> data = new Dictionary<Tile, Cell>();
+    TileGrid tileGrid;
+    List<Prototype> prototypes;
+    int height;
 
-        while (!IsCollapsed(data))
+    public Dictionary<Tile, Cell> Collapse(TileGrid tileGrid, List<Prototype> prototypes, int height)
+    {
+        this.tileGrid = tileGrid;
+        this.prototypes = prototypes;
+        this.height = height;
+
+        InitializeData();
+
+        while (!IsCollapsed())
         {
-            if (!Iterate(data, prototypes.Count))
+            if (!Iterate(prototypes.Count))
             {
                 Debug.Log("Iteration failed. Trying again...");
-                data = InitializeData(triangles, prototypes, height);
+                InitializeData();
             }
         }
 
         return data;
     }
 
-    public Dictionary<Triangle, Column> InitializeData(List<Triangle> triangles, List<Prototype> prototypes, int height)
+    public void InitializeData()
     {
-        Dictionary<Triangle, Column> data = InitializeDataStructure(triangles, prototypes, height);
+        InitializeDataStructure();
 
-        while (!SetUpOceansAndSkies(data, height))
+        while (!SetUpOceansAndSkies())
         {
             Debug.Log("Failed to initialize oceans and skies. Trying again...");
-            data = InitializeDataStructure(triangles, prototypes, height);
+            InitializeDataStructure();
         }
-
-        return data;
     }
 
-    Dictionary<Triangle, Column> InitializeDataStructure(List<Triangle> triangles, List<Prototype> prototypes, int height)
+    void InitializeDataStructure()
     {
-        Dictionary<Triangle, Column> data = new Dictionary<Triangle, Column>();
-        foreach (Triangle t in triangles)
+        data = new Dictionary<Tile, Cell>();
+        foreach (Tile t in tileGrid.tiles)
         {
-            data.Add(t, new Column(t, prototypes, height));
+            data.Add(t, new Cell(t, prototypes));
         }
-        return data;
     }
 
-    bool SetUpOceansAndSkies(Dictionary<Triangle, Column> data, int height)
+    bool SetUpOceansAndSkies()
     {
-        if (!CreateOceans(data))
+        if (!CreateOceans())
             return false;
-        if (!CreateSkies(data, height))
+        if (!CreateSkies())
             return false;
         return true;
     }
 
-    bool CreateOceans(Dictionary<Triangle, Column> data)
+    bool CreateOceans()
     {
-        foreach (Column column in data.Values)
+        foreach (Cell cell in data.Values)
         {
-            Cell bottomCell = column.GetCellAtY(0);
+            if (cell.tile.y > 0)
+                continue;
             Direction[] sides = new Direction[] { Direction.Back, Direction.Right, Direction.Left };
             foreach (Direction dir in sides)
             {
-                if (GetNeighborCell(data, bottomCell, dir) is null)
+                if (GetNeighborCell(cell, dir) is null)
                 {
-                    bottomCell.CollapseTo("OOO");
-                    if (!Propagate(data, bottomCell))
+                    cell.CollapseTo("OOO");
+                    if (!Propagate(cell))
                         return false;
                     break;
                 }
@@ -84,26 +91,27 @@ public class WaveFunctionCollapse
         return true;
     }
 
-    bool CreateSkies(Dictionary<Triangle, Column> data, int height)
+    bool CreateSkies()
     {
-        foreach (Column column in data.Values)
+        foreach (Cell cell in data.Values)
         {
-            Cell topCell = column.GetCellAtY(height - 1);
-            topCell.CollapseTo("EEE");
-            if (!Propagate(data, topCell))
+            if (cell.tile.y < height - 1)
+                continue;
+            cell.CollapseTo("EEE");
+            if (!Propagate(cell))
                 return false;
         }
         return true;
     }
 
-    public bool Iterate(Dictionary<Triangle, Column> data, int maxEntropy)
+    public bool Iterate(int maxEntropy)
     {
-        Cell cell = GetMinEntropyCell(data, maxEntropy);
+        Cell cell = GetMinEntropyCell(maxEntropy);
         cell.Collapse();
-        return Propagate(data, cell);
+        return Propagate(cell);
     }
 
-    bool Propagate(Dictionary<Triangle, Column> data, Cell cell)
+    bool Propagate(Cell cell)
     {
         Stack<Cell> stack = new Stack<Cell>();
         stack.Push(cell);
@@ -115,7 +123,7 @@ public class WaveFunctionCollapse
             Direction[] directions = (Direction[])Enum.GetValues(typeof(Direction));
             foreach (Direction dir in directions)
             {
-                Cell neighbor = GetNeighborCell(data, currentCell, dir);
+                Cell neighbor = GetNeighborCell(currentCell, dir);
                 if (neighbor is null)
                     continue;
 
@@ -169,125 +177,92 @@ public class WaveFunctionCollapse
         return possibleNeighbors;
     }
 
-    Cell GetNeighborCell(Dictionary<Triangle, Column> data, Cell cell, Direction dir)
+    Cell GetNeighborCell(Cell cell, Direction dir)
     {
-        Triangle neighbor;
-        switch (dir)
-        {
-            case Direction.Back:
-                neighbor = cell.triangle.backNeighbor;
-                if (!(neighbor is null))
-                    return data[neighbor].GetCellAtY(cell.y);
-                break;
-            case Direction.Right:
-                neighbor = cell.triangle.rightNeighbor;
-                if (!(neighbor is null))
-                    return data[neighbor].GetCellAtY(cell.y);
-                break;
-            case Direction.Left:
-                neighbor = cell.triangle.leftNeighbor;
-                if (!(neighbor is null))
-                    return data[neighbor].GetCellAtY(cell.y);
-                break;
-            case Direction.Top:
-                if (cell.y != cell.column.height - 1)
-                    return cell.column.GetCellAtY(cell.y + 1);
-                break;
-            case Direction.Bottom:
-                if (cell.y != 0)
-                    return cell.column.GetCellAtY(cell.y - 1);
-                break;
-        }
-
+        Tile neighborTile = tileGrid.GetNeighbor(cell.tile, dir);
+        if (neighborTile is not null)
+            return data[neighborTile];
         return null;
-    }
-
-    public bool IsCollapsed(Dictionary<Triangle, Column> data)
-    {
-        foreach(Column column in data.Values)
-        {
-            if (!column.IsCollapsed())
-                return false;
-        }
-        return true;
-    }
-
-    Cell GetMinEntropyCell(Dictionary<Triangle, Column> data, int maxEntropy)
-    {
-        int lowestEntropyValue = maxEntropy;
-        List<Cell> candidates = new List<Cell>();
-
-        foreach (Column column in data.Values)
-        {
-            Cell lowestEntropyCellInColumn = column.CalcMinEntropyCell();
-            //Debug.Log("LowestEntropyInCell: " + lowestEntropyCellInColumn.GetEntropy());
-            int entropy = lowestEntropyCellInColumn.GetEntropy();
-            if (entropy == 1) // Ignore already collapsed cells
-                continue;
-            if (entropy < lowestEntropyValue)
-            {
-                lowestEntropyValue = entropy;
-                candidates.Clear();
-                candidates.Add(lowestEntropyCellInColumn);
-                continue;
-            }
-            if (entropy == lowestEntropyValue)
-                candidates.Add(lowestEntropyCellInColumn);
-        }
-
-        // Randomly choose one from candidates and return it
-        return candidates[UnityEngine.Random.Range(0, candidates.Count)];
-    }
-}
-
-public class Column
-{
-    Triangle triangle;
-    public List<Cell> cells;
-    public int height;
-
-    public Column(Triangle triangle, List<Prototype> prototypes, int height)
-    {
-        this.triangle = triangle;
-        this.height = height;
-
-        this.cells = new List<Cell>();
-        for (int i = 0; i < height; ++i)
-        {
-            this.cells.Add(new Cell(triangle, this, prototypes, i));
-        }
-    }
-
-    public Cell GetCellAtY(int y)
-    {
-        return cells[y];
     }
 
     public bool IsCollapsed()
     {
-        foreach (Cell cell in cells)
+        foreach(Cell cell in data.Values)
         {
-            if (cell.GetEntropy() > 1)
+            if (!cell.IsCollapsed)
                 return false;
         }
         return true;
     }
 
-    public Cell CalcMinEntropyCell()
+    Cell GetMinEntropyCell(int maxEntropy)
     {
-        Cell lowestEntropyCell = cells[0];
-        foreach (Cell cell in cells)
+        int lowestEntropyValue = maxEntropy;
+        List<Cell> candidates = new List<Cell>();
+
+        foreach (Cell cell in data.Values)
         {
-            // Can't include already collapsed cells.
-            if (lowestEntropyCell.GetEntropy() == 1)
+            if (cell.Entropy == 1) // Ignore already collapsed cells
+                continue;
+            if (cell.Entropy < lowestEntropyValue)
             {
-                lowestEntropyCell = cell;
+                lowestEntropyValue = cell.Entropy;
+                candidates.Clear();
+                candidates.Add(cell);
                 continue;
             }
-            if (cell.GetEntropy() > 1 && cell.GetEntropy() < lowestEntropyCell.GetEntropy())
-                lowestEntropyCell = cell;
+            if (cell.Entropy == lowestEntropyValue)
+                candidates.Add(cell);
         }
-        return lowestEntropyCell;
+
+        candidates = GetLowestCells(candidates);
+        candidates = GetFurthestCells(candidates);
+
+        // Randomly choose one from candidates and return it
+        return candidates[UnityEngine.Random.Range(0, candidates.Count)];
+    }
+
+    List<Cell> GetLowestCells(List<Cell> cells)
+    {
+        List<Cell> candidates = new List<Cell> { cells[0] };
+        int lowestY = cells[0].tile.y;
+
+        foreach (Cell cell in cells)
+        {
+            if (cell.tile.y < lowestY)
+            {
+                lowestY = cell.tile.y;
+                candidates.Clear();
+                candidates.Add(cell);
+                continue;
+            }
+            if (cell.tile.y == lowestY)
+                candidates.Add(cell);
+        }
+
+        return candidates;
+    }
+
+    List<Cell> GetFurthestCells(List<Cell> cells)
+    {
+        List<Cell> candidates = new List<Cell> { cells[0] };
+        int furthestDist = cells[0].tile.DistanceTo(0, 0, 0);
+
+        foreach (Cell cell in cells)
+        {
+            int dist = cell.tile.DistanceTo(0, 0, 0);
+            if (dist < furthestDist)
+            {
+                furthestDist = dist;
+                candidates.Clear();
+                candidates.Add(cell);
+                continue;
+            }
+            if (dist == furthestDist)
+                candidates.Add(cell);
+        }
+
+        return candidates;
     }
 }
 
@@ -295,47 +270,41 @@ public class Cell
 {
     const int TRAVERSAL_MULTIPLIER = 5;
 
-    public Triangle triangle;
-    public Column column;
+    public Tile tile;
     public List<Prototype> prototypes;
-    public int y;
 
-    public Cell(Triangle triangle, Column column, List<Prototype> prototypes, int y)
+    public Cell(Tile tile, List<Prototype> prototypes)
     {
-        this.triangle = triangle;
-        this.column = column;
+        this.tile = tile;
         this.prototypes = new List<Prototype>(prototypes);
-        this.y = y;
     }
 
-    public int GetEntropy()
-    {
-        return prototypes.Count;
-    }
+    public bool IsCollapsed => prototypes.Count == 1;
+    public int Entropy => prototypes.Count;
 
     public void Collapse()
     {
-        //Prototype proto = prototypes[UnityEngine.Random.Range(0, prototypes.Count)];
-        //prototypes = new List<Prototype>();
-        //prototypes.Add(proto);
+        Prototype proto = prototypes[UnityEngine.Random.Range(0, prototypes.Count)];
+        prototypes = new List<Prototype>();
+        prototypes.Add(proto);
 
-        int sumOfWeights = 0;
-        foreach (Prototype p in prototypes)
-        {
-            sumOfWeights += (1 + (p.traversalScore * TRAVERSAL_MULTIPLIER));
-        }
-        int target = UnityEngine.Random.Range(0, sumOfWeights);
-        int currentValue = 0;
-        foreach (Prototype p in prototypes)
-        {
-            currentValue += 1 + (p.traversalScore * TRAVERSAL_MULTIPLIER);
-            if (currentValue > target)
-            {
-                prototypes = new List<Prototype>();
-                prototypes.Add(p);
-                return;
-            }
-        }
+        //int sumOfWeights = 0;
+        //foreach (Prototype p in prototypes)
+        //{
+        //    sumOfWeights += (1 + (p.traversalScore * TRAVERSAL_MULTIPLIER));
+        //}
+        //int target = UnityEngine.Random.Range(0, sumOfWeights);
+        //int currentValue = 0;
+        //foreach (Prototype p in prototypes)
+        //{
+        //    currentValue += 1 + (p.traversalScore * TRAVERSAL_MULTIPLIER);
+        //    if (currentValue > target)
+        //    {
+        //        prototypes = new List<Prototype>();
+        //        prototypes.Add(p);
+        //        return;
+        //    }
+        //}
     }
 
     public void CollapseTo(string prototypeName)
