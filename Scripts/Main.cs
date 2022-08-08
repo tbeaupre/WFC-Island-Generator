@@ -6,7 +6,7 @@ using UnityEngine;
 public class Main : MonoBehaviour
 {
     public static int height = 5;
-    public static int radius = 8;
+    public static int radius = 10;
     public int triangleSize = 2;
     WaveFunctionCollapse wfc;
     CellDataToMesh cdtm;
@@ -28,16 +28,19 @@ public class Main : MonoBehaviour
         prototypes = ModuleLoader.GetPrototypesFromFile();
         gameObjects = new List<GameObject>();
 
-        data = wfc.Collapse(tileGrid, prototypes, height);
-        Draw(data);
+        StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, 0.1f, data => {
+            Draw(data);
+        }));
     }
 
     void Update()
     {
         if (Input.GetKeyDown("space"))
         {
-            data = wfc.Collapse(tileGrid, prototypes, height);
-            Draw(data);
+            StopAllCoroutines();
+            StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, 0.1f, data => {
+                Draw(data);
+            }));
         }
     }
 

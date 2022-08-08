@@ -16,12 +16,12 @@ public enum Direction
 // TODO: Make edge cells FFF? Should make the island look a bit nicer.
 public class WaveFunctionCollapse
 {
-    Dictionary<Tile, Cell> data = new Dictionary<Tile, Cell>();
+    Dictionary<Tile, Cell> data;
     TileGrid tileGrid;
     List<Prototype> prototypes;
     int height;
 
-    public Dictionary<Tile, Cell> Collapse(TileGrid tileGrid, List<Prototype> prototypes, int height)
+    public IEnumerator CollapseCo(TileGrid tileGrid, List<Prototype> prototypes, int height, float timeBetweenSteps, Action<Dictionary<Tile, Cell>> callback)
     {
         this.tileGrid = tileGrid;
         this.prototypes = prototypes;
@@ -36,9 +36,10 @@ public class WaveFunctionCollapse
                 Debug.Log("Iteration failed. Trying again...");
                 InitializeData();
             }
+            callback(data);
+            yield return new WaitForSeconds(timeBetweenSteps);
         }
 
-        return data;
     }
 
     public void InitializeData()
