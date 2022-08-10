@@ -27,11 +27,18 @@ public class Tile
         return Mathf.Abs(this.a - a) + Mathf.Abs(this.b - b) + Mathf.Abs(this.c - c);
     }
 
-    public Triangle ToTriangle()
+    public Vector3 GetCenter()
     {
         Vector2 triCenter = new Vector2(
             ((0.5f * a) + (-0.5f * c)) * triWidth,
             ((-SQRT_3 / 6 * a) + (SQRT_3 / 3 * b) - (SQRT_3 / 6 * c)) * triWidth);
+        return new Vector3(triCenter.x, y, triCenter.y);
+    }
+
+    public Triangle ToTriangle()
+    {
+        Vector3 triCenter3d = GetCenter();
+        Vector2 triCenter = new Vector2(triCenter3d.x, triCenter3d.z);
         float yOffsetToBase = SQRT_3 / 6 * triWidth;
         if (PointsUp)
         {
