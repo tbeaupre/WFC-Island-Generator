@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public enum Direction
 {
@@ -31,7 +32,7 @@ public class WaveFunctionCollapse
 
         while (!IsCollapsed())
         {
-            if (!Iterate(prototypes.Count))
+            if (!Iterate())
             {
                 Debug.Log("Iteration failed. Trying again...");
                 InitializeData();
@@ -105,9 +106,10 @@ public class WaveFunctionCollapse
         return true;
     }
 
-    public bool Iterate(int maxEntropy)
+    public bool Iterate()
     {
-        Cell cell = GetMinEntropyCell(maxEntropy);
+        Cell cell = GetNextCell();
+        Debug.Log($"{cell.tile.a}, {cell.tile.b}, {cell.tile.c}, {cell.tile.y}");
         cell.Collapse();
         return Propagate(cell);
     }
@@ -196,15 +198,26 @@ public class WaveFunctionCollapse
         return true;
     }
 
-    Cell GetMinEntropyCell(int maxEntropy)
+    Cell GetNextCell()
     {
-        int lowestEntropyValue = maxEntropy;
+        List<Cell> candidates = new List<Cell>(data.Values);
+        candidates = candidates.Where(c => c.prototypes.Count != 1).ToList();
+
+        candidates = GetFurthestCells(candidates);
+        candidates = GetLowestCells(candidates);
+        candidates = GetMinEntropyCells(candidates);
+
+        // Randomly choose one from candidates and return it
+        return candidates[UnityEngine.Random.Range(0, candidates.Count)];
+    }
+
+    List<Cell> GetMinEntropyCells(List<Cell> cells)
+    {
+        int lowestEntropyValue = prototypes.Count;
         List<Cell> candidates = new List<Cell>();
 
-        foreach (Cell cell in data.Values)
+        foreach (Cell cell in cells)
         {
-            if (cell.Entropy == 1) // Ignore already collapsed cells
-                continue;
             if (cell.Entropy < lowestEntropyValue)
             {
                 lowestEntropyValue = cell.Entropy;
@@ -216,11 +229,7 @@ public class WaveFunctionCollapse
                 candidates.Add(cell);
         }
 
-        candidates = GetLowestCells(candidates);
-        candidates = GetFurthestCells(candidates);
-
-        // Randomly choose one from candidates and return it
-        return candidates[UnityEngine.Random.Range(0, candidates.Count)];
+        return candidates;
     }
 
     List<Cell> GetLowestCells(List<Cell> cells)
@@ -230,6 +239,8 @@ public class WaveFunctionCollapse
 
         foreach (Cell cell in cells)
         {
+            if (cell == cells[0])
+                continue;
             if (cell.tile.y < lowestY)
             {
                 lowestY = cell.tile.y;
@@ -251,8 +262,10 @@ public class WaveFunctionCollapse
 
         foreach (Cell cell in cells)
         {
+            if (cell == cells[0])
+                continue;
             int dist = cell.tile.DistanceTo(0, 0, 0);
-            if (dist < furthestDist)
+            if (dist > furthestDist)
             {
                 furthestDist = dist;
                 candidates.Clear();
@@ -264,59 +277,5 @@ public class WaveFunctionCollapse
         }
 
         return candidates;
-    }
-}
-
-public class Cell
-{
-    const int TRAVERSAL_MULTIPLIER = 5;
-
-    public Tile tile;
-    public List<Prototype> prototypes;
-
-    public Cell(Tile tile, List<Prototype> prototypes)
-    {
-        this.tile = tile;
-        this.prototypes = new List<Prototype>(prototypes);
-    }
-
-    public bool IsCollapsed => prototypes.Count == 1;
-    public int Entropy => prototypes.Count;
-
-    public void Collapse()
-    {
-        Prototype proto = prototypes[UnityEngine.Random.Range(0, prototypes.Count)];
-        prototypes = new List<Prototype>();
-        prototypes.Add(proto);
-
-        //int sumOfWeights = 0;
-        //foreach (Prototype p in prototypes)
-        //{
-        //    sumOfWeights += (1 + (p.traversalScore * TRAVERSAL_MULTIPLIER));
-        //}
-        //int target = UnityEngine.Random.Range(0, sumOfWeights);
-        //int currentValue = 0;
-        //foreach (Prototype p in prototypes)
-        //{
-        //    currentValue += 1 + (p.traversalScore * TRAVERSAL_MULTIPLIER);
-        //    if (currentValue > target)
-        //    {
-        //        prototypes = new List<Prototype>();
-        //        prototypes.Add(p);
-        //        return;
-        //    }
-        //}
-    }
-
-    public void CollapseTo(string prototypeName)
-    {
-        Prototype proto = prototypes.Find(p => p.name == prototypeName);
-        prototypes = new List<Prototype>();
-        prototypes.Add(proto);
-    }
-
-    public void Constrain(Prototype prototype)
-    {
-        prototypes.Remove(prototype);
     }
 }
