@@ -24,14 +24,29 @@ public class CellDataToMesh : MonoBehaviour
         UpdateName();
     }
 
-    public void UpdateVisuals(Cell cell)
+    public void UpdateVisuals(Cell cell, bool drawAll)
     {
         this.cell = cell;
         UpdateName();
-        if (!isCollapsed && cell.prototypes.Count == 1)
+        if (drawAll)
         {
-            CreateMeshFromPrototype(cell.prototypes[0], cell.tile.ToTriangle(), cell.tile.y);
-            isCollapsed = true;
+            foreach (Prototype p in cell.prototypes)
+            {
+                CreateMeshFromPrototype(p, cell.tile.ToTriangle(), cell.tile.y);
+            }
+        }
+        else
+        {
+            if (!isCollapsed && cell.prototypes.Count == 1)
+            {
+                CreateMeshFromPrototype(cell.prototypes[0], cell.tile.ToTriangle(), cell.tile.y);
+                isCollapsed = true;
+            }
+        }
+        if (!isCollapsed && cell.prototypes.Count == 0)
+        {
+            Triangle tri = cell.tile.ToTriangle();
+            CreateMeshObjectAtPoint("Interior", GetTriangleCenter(tri, cell.tile.y));
         }
     }
 

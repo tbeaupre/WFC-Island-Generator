@@ -48,9 +48,38 @@ public class Prototype
     public string name;
     public string meshName;
     public int rotation;
-    public int traversalScore;
+    public TraversalSet traversalSet;
     public SocketSet sockets;
     public ValidNeighbors validNeighbors;
+}
+
+[System.Serializable]
+public class TraversalSet
+{
+    public bool back;
+    public bool right;
+    public bool left;
+    public bool top;
+    public bool bottom;
+
+    public bool GetIsTraversableInDirection(Direction dir)
+    {
+        switch (dir)
+        {
+            case Direction.Back:
+                return back;
+            case Direction.Right:
+                return right;
+            case Direction.Left:
+                return left;
+            case Direction.Top:
+                return top;
+            case Direction.Bottom:
+                return bottom;
+            default:
+                return top;
+        }
+    }
 }
 
 [System.Serializable]

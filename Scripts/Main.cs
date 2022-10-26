@@ -26,8 +26,8 @@ public class Main : MonoBehaviour
     {
         prototypes = ModuleLoader.GetPrototypesFromFile();
 
-        StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, 0.1f, data => {
-            Draw(data);
+        StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, 0.1f, (data, drawAll) => {
+            Draw(data, drawAll);
         }));
     }
 
@@ -37,14 +37,14 @@ public class Main : MonoBehaviour
         {
             StopAllCoroutines();
             cm.Clear();
-            StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, 0.1f, data => {
-                Draw(data);
+            StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, 0.1f, (data, drawAll) => {
+                Draw(data, drawAll);
             }));
         }
     }
 
-    void Draw(Dictionary<Tile, Cell> data)
+    void Draw(Dictionary<Tile, Cell> data, bool drawAll)
     {
-        cm.UpdateCells(data.Values.ToList());
+        cm.UpdateCells(data.Values.ToList(), drawAll);
     }
 }

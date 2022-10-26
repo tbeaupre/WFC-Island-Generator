@@ -21,8 +21,9 @@ public class WaveFunctionCollapse
     TileGrid tileGrid;
     List<Prototype> prototypes;
     int height;
+    TraversalManager tm;
 
-    public IEnumerator CollapseCo(TileGrid tileGrid, List<Prototype> prototypes, int height, float timeBetweenSteps, Action<Dictionary<Tile, Cell>> callback)
+    public IEnumerator CollapseCo(TileGrid tileGrid, List<Prototype> prototypes, int height, float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
     {
         this.tileGrid = tileGrid;
         this.prototypes = prototypes;
@@ -35,9 +36,11 @@ public class WaveFunctionCollapse
             if (!Iterate())
             {
                 Debug.Log("Iteration failed. Trying again...");
+                callback(data, true);
+                yield break;
                 InitializeData();
             }
-            callback(data);
+            callback(data, false);
             yield return new WaitForSeconds(timeBetweenSteps);
         }
 
@@ -61,6 +64,7 @@ public class WaveFunctionCollapse
         {
             data.Add(t, new Cell(t, prototypes));
         }
+        tm = new TraversalManager(tileGrid);
     }
 
     bool SetUpOceansAndSkies()
@@ -83,7 +87,7 @@ public class WaveFunctionCollapse
             {
                 if (GetNeighborCell(cell, dir) is null)
                 {
-                    cell.CollapseTo("OOO");
+                    cell.CollapseTo(tm, "OOO-EEE");
                     if (!Propagate(cell))
                         return false;
                     break;
@@ -99,7 +103,7 @@ public class WaveFunctionCollapse
         {
             if (cell.tile.y < height - 1)
                 continue;
-            cell.CollapseTo("EEE");
+            cell.CollapseTo(tm, "EEE");
             if (!Propagate(cell))
                 return false;
         }
@@ -109,8 +113,8 @@ public class WaveFunctionCollapse
     public bool Iterate()
     {
         Cell cell = GetNextCell();
-        Debug.Log($"{cell.tile.a}, {cell.tile.b}, {cell.tile.c}, {cell.tile.y}");
-        cell.Collapse();
+        // Debug.Log($"{cell.tile.a}, {cell.tile.b}, {cell.tile.c}, {cell.tile.y}");
+        cell.Collapse(tm);
         return Propagate(cell);
     }
 
@@ -143,7 +147,10 @@ public class WaveFunctionCollapse
                     {
                         neighbor.Constrain(otherPrototype);
                         if (neighbor.prototypes.Count == 0)
+                        {
+                            Debug.Log($"{neighbor.tile.a}, {neighbor.tile.b}, {neighbor.tile.c}, {neighbor.tile.y}");
                             return false;
+                        }
                         if (!stack.Contains(neighbor))
                             stack.Push(neighbor);
                     }
@@ -203,8 +210,8 @@ public class WaveFunctionCollapse
         List<Cell> candidates = new List<Cell>(data.Values);
         candidates = candidates.Where(c => c.prototypes.Count != 1).ToList();
 
-        candidates = GetFurthestCells(candidates);
         candidates = GetLowestCells(candidates);
+        candidates = GetFurthestCells(candidates);
         candidates = GetMinEntropyCells(candidates);
 
         // Randomly choose one from candidates and return it

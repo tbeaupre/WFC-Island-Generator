@@ -29,27 +29,26 @@ public class CellManager
         cellDataMap.Clear();
     }
 
-    public void UpdateCells(List<Cell> cells)
+    public void UpdateCells(List<Cell> cells, bool drawAll)
     {
         List<Cell> toBeDeleted = cellDataMap.Keys.ToList();
         cells.ForEach(cell => toBeDeleted.Remove(cell));
         foreach (Cell key in toBeDeleted)
         {
-            Debug.Log("Found Cell to be Destroyed");
             GameObject.Destroy(cellDataMap[key].gameObject);
             cellDataMap.Remove(key);
         }
 
         foreach (Cell cell in cells)
         {
-            CreateOrUpdateMeshFromCell(cell);
+            CreateOrUpdateMeshFromCell(cell, drawAll);
         }
     }
 
-    void CreateOrUpdateMeshFromCell(Cell cell)
+    void CreateOrUpdateMeshFromCell(Cell cell, bool drawAll)
     {
         if (cellDataMap.ContainsKey(cell))
-            cellDataMap[cell].UpdateVisuals(cell);
+            cellDataMap[cell].UpdateVisuals(cell, drawAll);
         else
             CreateMeshFromCell(cell);
     }
