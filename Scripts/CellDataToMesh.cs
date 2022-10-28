@@ -12,6 +12,7 @@ public class CellDataToMesh : MonoBehaviour
     [SerializeField]
     bool debug = false;
     bool isCollapsed = false;
+    float yScaling = 0.5f;
     private Dictionary<string, GameObject> namePrefabMap = new Dictionary<string, GameObject>();
 
     public void Init(Dictionary<string, GameObject> namePrefabMap, Cell cell)
@@ -28,34 +29,39 @@ public class CellDataToMesh : MonoBehaviour
     {
         this.cell = cell;
         UpdateName();
-        if (drawAll)
+        if (drawAll && !isCollapsed)
         {
             foreach (Prototype p in cell.prototypes)
             {
-                CreateMeshFromPrototype(p, cell.tile.ToTriangle(), cell.tile.y);
+                CreateMeshFromPrototype(p, cell.tile.ToTriangle(), cell.tile.y * yScaling);
             }
+            if (cell.prototypes.Count == 1)
+                isCollapsed = true;
         }
         else
         {
             if (!isCollapsed && cell.prototypes.Count == 1)
             {
-                CreateMeshFromPrototype(cell.prototypes[0], cell.tile.ToTriangle(), cell.tile.y);
+                CreateMeshFromPrototype(cell.prototypes[0], cell.tile.ToTriangle(), cell.tile.y * yScaling);
                 isCollapsed = true;
             }
         }
         if (!isCollapsed && cell.prototypes.Count == 0)
         {
             Triangle tri = cell.tile.ToTriangle();
-            CreateMeshObjectAtPoint("Interior", GetTriangleCenter(tri, cell.tile.y));
+            CreateMeshObjectAtPoint("Interior", GetTriangleCenter(tri, cell.tile.y * yScaling));
         }
     }
 
     private void UpdateName()
     {
+        string tileCoords = $"{cell.tile.a}, {cell.tile.b}, {cell.tile.c}, {cell.tile.y}";
         if (cell.prototypes.Count == 1)
-            name = "Collapsed: " + cell.prototypes[0].name;
+            name = $"{tileCoords} Collapsed: {cell.prototypes[0].name}";
         else if (cell.prototypes.Count == 0)
-            name = "FAILED";
+            name = $"{tileCoords} FAILED";
+        else
+            name = tileCoords;
         prototypeNames = cell.prototypes.Select(cell => cell.name).ToList();
     }
 
@@ -123,6 +129,7 @@ public class CellDataToMesh : MonoBehaviour
     GameObject CreateMeshObject(string meshName)
     {
         GameObject go = Instantiate(namePrefabMap[meshName], transform);
+        go.transform.localScale = new Vector3(1, yScaling, 1);
         return go;
     }
 }
