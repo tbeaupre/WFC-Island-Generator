@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class TraversalManager
 {
@@ -17,19 +18,28 @@ public class TraversalManager
     {
         Dictionary<Prototype, HashSet<Tile>> protoTraversalMap = new Dictionary<Prototype, HashSet<Tile>>();
 
-        foreach (Prototype p in cell.prototypes)
+        List<Prototype> possibleProtos = MountainHelper.RemoveLocalMinima(cell.tile, cell.prototypes);
+
+        if (cell.tile.y == 0) // Don't leave holes in the map.
+        {
+            possibleProtos = possibleProtos.Where(p => !p.traversalSet.bottom).ToList();
+            if (possibleProtos.Count == 0)
+                Debug.Log(cell.prototypes);
+        }
+
+        foreach (Prototype p in possibleProtos)
         {
             protoTraversalMap.Add(p, GetAllReachableTiles(cell.tile, p));
         }
 
         int sumOfWeights = 0;
-        foreach (Prototype p in cell.prototypes)
+        foreach (Prototype p in possibleProtos)
         {
             sumOfWeights += 1 + protoTraversalMap[p].Count;
         }
         int target = UnityEngine.Random.Range(0, sumOfWeights);
         int currentValue = 0;
-        foreach (Prototype p in cell.prototypes)
+        foreach (Prototype p in possibleProtos)
         {
             currentValue += 1 + protoTraversalMap[p].Count;
             if (currentValue > target)
@@ -45,28 +55,6 @@ public class TraversalManager
     public void SetTilePrototype(Tile t, Prototype p)
     {
         AddPickToTraversalMap(t, GetAllReachableTiles(t, p));
-    }
-
-    List<Prototype> GetMostTraversableOptions(Cell cell)
-    {
-        int highestTraversalValue = 0;
-        List<Prototype> candidates = new List<Prototype>();
-
-        foreach (Prototype p in cell.prototypes)
-        {
-            HashSet<Tile> reachableTiles = GetAllReachableTiles(cell.tile, p);
-            if (reachableTiles.Count > highestTraversalValue)
-            {
-                highestTraversalValue = reachableTiles.Count;
-                candidates.Clear();
-                candidates.Add(p);
-                continue;
-            }
-            if (reachableTiles.Count == highestTraversalValue)
-                candidates.Add(p);
-        }
-
-        return candidates;
     }
 
     void AddPickToTraversalMap(Tile t, HashSet<Tile> reachableTiles)
