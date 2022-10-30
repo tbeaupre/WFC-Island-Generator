@@ -27,6 +27,14 @@ public class Tile
         return Mathf.Abs(this.a - a) + Mathf.Abs(this.b - b) + Mathf.Abs(this.c - c);
     }
 
+    public int AltDistanceTo(int a, int b, int c)
+    {
+        int dA = this.a - a;
+        int dB = this.b - b;
+        int dC = this.c - c;
+        return (Mathf.Abs(dA - dB) + Mathf.Abs(dB - dC) + Mathf.Abs(dC - dA)) / 2;
+    }
+
     public Vector3 GetCenter()
     {
         Vector2 triCenter = new Vector2(

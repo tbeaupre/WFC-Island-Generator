@@ -11,17 +11,20 @@ public class TileGrid
     {
         int min = -radius;
         int max = radius;
-        for (int y = 0; y < height; ++y)
+        for (int a = min; a <= max; ++a)
         {
-            for (int a = min; a < max; ++a)
+            for (int b = min; b <= max; ++b)
             {
-                for (int b = min; b < max; ++b)
+                for (int c = min; c <= max; ++c)
                 {
-                    for (int c = min; c < max; ++c)
+                    Tile testTile = new Tile(a, b, c, 0);
+                    if (testTile.IsValid() && testTile.AltDistanceTo(0, 0, 0) <= radius)
                     {
-                        Tile tile = new Tile(a, b, c, y);
-                        if (tile.IsValid() && tile.DistanceTo(0, 0, 0) <= radius)
+                        for (int y = 0; y < height; ++y)
+                        {
+                            Tile tile = new Tile(a, b, c, y);
                             tiles.Add(tile);
+                        }
                     }
                 }
             }
