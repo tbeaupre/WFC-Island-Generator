@@ -65,6 +65,7 @@ public class WaveFunctionCollapse
             data.Add(t, new Cell(t, prototypes));
         }
         tm = new TraversalManager(tileGrid);
+        OceanHelper.Init(tileGrid, data);
     }
 
     bool SetUpOceansAndSkies()
@@ -210,9 +211,9 @@ public class WaveFunctionCollapse
         List<Cell> candidates = new List<Cell>(data.Values);
         candidates = candidates.Where(c => c.prototypes.Count != 1).ToList();
 
-        candidates = GetLowestCells(candidates);
         candidates = GetFurthestCells(candidates);
         candidates = GetMinEntropyCells(candidates);
+        candidates = GetLowestCells(candidates);
 
         // Randomly choose one from candidates and return it
         return candidates[UnityEngine.Random.Range(0, candidates.Count)];

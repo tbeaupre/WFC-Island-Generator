@@ -18,7 +18,8 @@ public class TraversalManager
     {
         Dictionary<Prototype, HashSet<Tile>> protoTraversalMap = new Dictionary<Prototype, HashSet<Tile>>();
 
-        List<Prototype> possibleProtos = MountainHelper.RemoveLocalMinima(cell.tile, cell.prototypes);
+        List<Prototype> possibleProtos = OceanHelper.ReduceOceans(cell.tile, cell.prototypes);
+        possibleProtos = MountainHelper.RemoveLocalMinima(cell.tile, possibleProtos);
 
         if (cell.tile.y == 0) // Don't leave holes in the map.
         {
