@@ -11,6 +11,7 @@ public class TileGrid
     {
         int min = -radius;
         int max = radius;
+        float squareRadius = radius * radius + 0.1f;
         for (int a = min; a <= max; ++a)
         {
             for (int b = min; b <= max; ++b)
@@ -18,9 +19,10 @@ public class TileGrid
                 for (int c = min; c <= max; ++c)
                 {
                     Tile testTile = new Tile(a, b, c, 0);
-                    if (testTile.IsValid() && testTile.AltDistanceTo(0, 0, 0) <= radius)
+                    if (testTile.IsValid() && testTile.SquareDistToCenter() <= squareRadius)
                     {
-                        for (int y = 0; y < height; ++y)
+                        tiles.Add(testTile);
+                        for (int y = 1; y < height; ++y)
                         {
                             Tile tile = new Tile(a, b, c, y);
                             tiles.Add(tile);

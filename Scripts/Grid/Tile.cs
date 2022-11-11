@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Tile
@@ -35,18 +36,27 @@ public class Tile
         return (Mathf.Abs(dA - dB) + Mathf.Abs(dB - dC) + Mathf.Abs(dC - dA)) / 2;
     }
 
-    public Vector3 GetCenter()
+    public float SquareDistToCenter()
     {
-        Vector2 triCenter = new Vector2(
+        Triangle t = ToTriangle();
+        return Mathf.Max(t.vertices.Select(v => v.sqrMagnitude).ToArray());
+    }
+    private Vector2 GetCenter2d()
+    {
+        return new Vector2(
             ((0.5f * a) + (-0.5f * c)) * triWidth,
             ((-SQRT_3 / 6 * a) + (SQRT_3 / 3 * b) - (SQRT_3 / 6 * c)) * triWidth);
+    }
+
+    public Vector3 GetCenter()
+    {
+        Vector2 triCenter = GetCenter2d();
         return new Vector3(triCenter.x, y, triCenter.y);
     }
 
     public Triangle ToTriangle()
     {
-        Vector3 triCenter3d = GetCenter();
-        Vector2 triCenter = new Vector2(triCenter3d.x, triCenter3d.z);
+        Vector2 triCenter = GetCenter2d();
         float yOffsetToBase = SQRT_3 / 6 * triWidth;
         if (PointsUp)
         {
