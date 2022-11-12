@@ -23,7 +23,7 @@ public class TraversalManager
 
         if (cell.tile.y == 0) // Don't leave holes in the map.
         {
-            possibleProtos = possibleProtos.Where(p => !p.traversalSet.bottom).ToList();
+            possibleProtos = possibleProtos.Where(p => !IsPrototypeOpenOnBottom(p)).ToList();
             if (possibleProtos.Count == 0)
                 Debug.Log(cell.prototypes);
         }
@@ -89,5 +89,17 @@ public class TraversalManager
         if (!(neighbor is null) && traversalMap.ContainsKey(neighbor))
             return traversalMap[neighbor];
         return new HashSet<Tile>();
+    }
+
+    private bool IsPrototypeOpenOnBottom(Prototype p)
+    {
+        if (p.meshName.Length == 0)
+            return p.name == "EEE";
+
+        string baseStr = p.meshName.Split('-')[0];
+        if (baseStr.Contains('E'))
+            return true;
+
+        return false;
     }
 }
