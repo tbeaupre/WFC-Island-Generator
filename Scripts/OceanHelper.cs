@@ -16,7 +16,11 @@ public class OceanHelper
 
     public static List<Prototype> ReduceOceans(Tile tile, List<Prototype> prototypes)
     {
-        List<Prototype> result = new List<Prototype>();
+        List<Prototype> result;
+        List<Prototype> noEmptyOcean = new List<Prototype>(prototypes);
+        noEmptyOcean.RemoveAll(p => p.name == "OOO-EEE");
+        if (noEmptyOcean.Count == 0)
+            return prototypes;
 
         Direction[] sides = new Direction[] { Direction.Back, Direction.Right, Direction.Left };
         foreach (Direction dir in sides)
@@ -26,12 +30,12 @@ public class OceanHelper
                 continue;
             if (IsOceanCell(data[neighborTile], dir))
             {
-                return prototypes;
+                return noEmptyOcean;
             }
         }
 
         result = prototypes.Where(p => !IsOceanPrototype(p)).ToList();
-        return result.Count == 0 ? prototypes : result;
+        return result.Count == 0 ? noEmptyOcean : result;
     }
 
     static bool IsOceanCell(Cell cell, Direction dir)
