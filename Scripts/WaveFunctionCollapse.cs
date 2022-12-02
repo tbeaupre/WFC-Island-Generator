@@ -60,7 +60,7 @@ public class WaveFunctionCollapse
     void InitializeDataStructure()
     {
         data = new Dictionary<Tile, Cell>();
-        foreach (Tile t in tileGrid.tiles)
+        foreach (Tile t in tileGrid.tileMap.Values)
         {
             data.Add(t, new Cell(t, prototypes));
         }
@@ -70,8 +70,8 @@ public class WaveFunctionCollapse
 
     bool SetUpOceansAndSkies()
     {
-        if (!CreateOceans())
-            return false;
+        //if (!CreateOceans())
+        //    return false;
         if (!CreateSkies())
             return false;
         return true;
@@ -79,22 +79,46 @@ public class WaveFunctionCollapse
 
     bool CreateOceans()
     {
-        foreach (Cell cell in data.Values)
+        List<Cell> groundCells = data.Values.Where(c => c.tile.y == 0).ToList();
+        foreach (Cell cell in groundCells)
         {
-            if (cell.tile.y > 0)
-                continue;
-            Direction[] sides = new Direction[] { Direction.Back, Direction.Right, Direction.Left };
-            foreach (Direction dir in sides)
+            if (cell.tile.PointsUp)
             {
-                if (GetNeighborCell(cell, dir) is null)
+                if ((cell.tile.a == -tileGrid.radius + 1 && !CellHasNeighborInDirection(cell, Direction.Right)) ||
+                    (cell.tile.b == -tileGrid.radius + 1 && !CellHasNeighborInDirection(cell, Direction.Back)) ||
+                    (cell.tile.c == -tileGrid.radius + 1 && !CellHasNeighborInDirection(cell, Direction.Left)))
                 {
-                    cell.CollapseTo(tm, "OOO-EEE");
-                    if (!Propagate(cell))
+                    if (!CollapseToOcean(cell))
                         return false;
-                    break;
+                    continue;
+                }
+            }
+            else
+            {
+                if ((cell.tile.a == tileGrid.radius && !CellHasNeighborInDirection(cell, Direction.Right)) ||
+                    (cell.tile.b == tileGrid.radius && !CellHasNeighborInDirection(cell, Direction.Back)) ||
+                    (cell.tile.c == tileGrid.radius && !CellHasNeighborInDirection(cell, Direction.Left)))
+                {
+                    if (!CollapseToOcean(cell))
+                        return false;
+                    continue;
                 }
             }
         }
+
+        return true;
+    }
+
+    bool CellHasNeighborInDirection(Cell cell, Direction dir)
+    {
+        return tileGrid.GetNeighbor(cell.tile, dir) is not null;
+    }
+
+    bool CollapseToOcean(Cell cell)
+    {
+        cell.CollapseTo(tm, "OOO-EEE");
+        if (!Propagate(cell))
+            return false;
         return true;
     }
 
@@ -211,9 +235,11 @@ public class WaveFunctionCollapse
         List<Cell> candidates = new List<Cell>(data.Values);
         candidates = candidates.Where(c => c.prototypes.Count != 1).ToList();
 
-        candidates = GetFurthestCells(candidates);
-        candidates = GetMinEntropyCells(candidates);
         candidates = GetLowestCells(candidates);
+        candidates = GetFurthestCells(candidates);
+        return candidates[0];
+
+        candidates = GetMinEntropyCells(candidates);
 
         // Randomly choose one from candidates and return it
         return candidates[UnityEngine.Random.Range(0, candidates.Count)];
@@ -266,13 +292,13 @@ public class WaveFunctionCollapse
     List<Cell> GetFurthestCells(List<Cell> cells)
     {
         List<Cell> candidates = new List<Cell> { cells[0] };
-        int furthestDist = cells[0].tile.DistanceTo(0, 0, 0);
+        float furthestDist = cells[0].tile.TileCenterToOrigin();
 
         foreach (Cell cell in cells)
         {
             if (cell == cells[0])
                 continue;
-            int dist = cell.tile.DistanceTo(0, 0, 0);
+            float dist = cell.tile.TileCenterToOrigin();
             if (dist > furthestDist)
             {
                 furthestDist = dist;
