@@ -6,6 +6,7 @@ using System.Linq;
 public class TileGrid
 {
     public List<Tile> tiles = new List<Tile>();
+    public Dictionary<(int, int, int, int), Tile> tileMap = new Dictionary<(int, int, int, int), Tile>();
 
     public TileGrid(int radius, int height)
     {
@@ -21,11 +22,11 @@ public class TileGrid
                     Tile testTile = new Tile(a, b, c, 0);
                     if (testTile.IsValid() && testTile.SquareDistToCenter() <= squareRadius)
                     {
-                        tiles.Add(testTile);
+                        tileMap.Add((a, b, c, 0), testTile);
                         for (int y = 1; y < height; ++y)
                         {
                             Tile tile = new Tile(a, b, c, y);
-                            tiles.Add(tile);
+                            tileMap.Add((a, b, c, y), tile);
                         }
                     }
                 }
@@ -33,7 +34,7 @@ public class TileGrid
         }
     }
 
-    public Tile GetTile(int a, int b, int c, int y) => tiles.FirstOrDefault(t => t.PositionalMatch(a, b, c, y));
+    public Tile GetTile(int a, int b, int c, int y) => tileMap.ContainsKey((a, b, c, y)) ? tileMap[(a, b, c, y)] : null;
 
     public Tile GetNeighbor(Tile t, Direction dir)
     {

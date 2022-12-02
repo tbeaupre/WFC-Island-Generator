@@ -25,11 +25,6 @@ public class Tile
 
     public int DistanceTo(int a, int b, int c)
     {
-        return Mathf.Abs(this.a - a) + Mathf.Abs(this.b - b) + Mathf.Abs(this.c - c);
-    }
-
-    public int AltDistanceTo(int a, int b, int c)
-    {
         int dA = this.a - a;
         int dB = this.b - b;
         int dC = this.c - c;
@@ -41,6 +36,12 @@ public class Tile
         Triangle t = ToTriangle();
         return Mathf.Max(t.vertices.Select(v => v.sqrMagnitude).ToArray());
     }
+
+    public float TileCenterToOrigin()
+    {
+        return GetCenter2d().magnitude;
+    }
+
     private Vector2 GetCenter2d()
     {
         return new Vector2(
@@ -81,6 +82,4 @@ public class Tile
     }
 
     public bool PointsUp => a + b + c == 2;
-
-    public bool PositionalMatch(int a, int b, int c, int y) => this.a == a && this.b == b && this.c == c && this.y == y;
 }
