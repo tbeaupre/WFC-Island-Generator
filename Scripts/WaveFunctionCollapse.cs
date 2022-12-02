@@ -70,54 +70,7 @@ public class WaveFunctionCollapse
 
     bool SetUpOceansAndSkies()
     {
-        //if (!CreateOceans())
-        //    return false;
         if (!CreateSkies())
-            return false;
-        return true;
-    }
-
-    bool CreateOceans()
-    {
-        List<Cell> groundCells = data.Values.Where(c => c.tile.y == 0).ToList();
-        foreach (Cell cell in groundCells)
-        {
-            if (cell.tile.PointsUp)
-            {
-                if ((cell.tile.a == -tileGrid.radius + 1 && !CellHasNeighborInDirection(cell, Direction.Right)) ||
-                    (cell.tile.b == -tileGrid.radius + 1 && !CellHasNeighborInDirection(cell, Direction.Back)) ||
-                    (cell.tile.c == -tileGrid.radius + 1 && !CellHasNeighborInDirection(cell, Direction.Left)))
-                {
-                    if (!CollapseToOcean(cell))
-                        return false;
-                    continue;
-                }
-            }
-            else
-            {
-                if ((cell.tile.a == tileGrid.radius && !CellHasNeighborInDirection(cell, Direction.Right)) ||
-                    (cell.tile.b == tileGrid.radius && !CellHasNeighborInDirection(cell, Direction.Back)) ||
-                    (cell.tile.c == tileGrid.radius && !CellHasNeighborInDirection(cell, Direction.Left)))
-                {
-                    if (!CollapseToOcean(cell))
-                        return false;
-                    continue;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    bool CellHasNeighborInDirection(Cell cell, Direction dir)
-    {
-        return tileGrid.GetNeighbor(cell.tile, dir) is not null;
-    }
-
-    bool CollapseToOcean(Cell cell)
-    {
-        cell.CollapseTo(tm, "OOO-EEE");
-        if (!Propagate(cell))
             return false;
         return true;
     }
@@ -237,8 +190,6 @@ public class WaveFunctionCollapse
 
         candidates = GetLowestCells(candidates);
         candidates = GetFurthestCells(candidates);
-        return candidates[0];
-
         candidates = GetMinEntropyCells(candidates);
 
         // Randomly choose one from candidates and return it
