@@ -14,6 +14,24 @@ public class OceanHelper
         data = newData;
     }
 
+    // Treat edges of the map like they're OOO-EEE
+    public static List<Prototype> ReduceForEdges(Tile tile, List<Prototype> prototypes)
+    {
+        if (tile.y != 0)
+            return prototypes;
+
+        List<Prototype> result = new List<Prototype>(prototypes);
+        Direction[] sides = new Direction[] { Direction.Back, Direction.Right, Direction.Left };
+        foreach (Direction dir in sides)
+        {
+            if (tileGrid.GetNeighbor(tile, dir) is null)
+            {
+                result = result.Where(p => IsFullOceanPrototypeInDirection(p, dir)).ToList();
+            }
+        }
+        return result;
+    }
+
     public static List<Prototype> ReduceOceans(Tile tile, List<Prototype> prototypes)
     {
         List<Prototype> result;
@@ -61,6 +79,28 @@ public class OceanHelper
                 return baseStr[(1 -p.rotation + 3) % 3] == 'O' || baseStr[(2 - p.rotation + 3) % 3] == 'O';
             default: // Direction.Left:
                 return baseStr[(2 - p.rotation + 3) % 3] == 'O' || baseStr[(-p.rotation + 3) % 3] == 'O';
+        }
+    }
+
+    static bool IsFullOceanPrototypeInDirection(Prototype p, Direction dir)
+    {
+        if (p.meshName.Length == 0)
+            return false;
+
+        string baseStr = p.meshName.Split('-')[0];
+        string cliffStr = p.meshName.Split('-')[1];
+
+        switch (dir)
+        {
+            case Direction.Back:
+                return baseStr[(-p.rotation + 3) % 3] == 'O' && baseStr[(1 - p.rotation + 3) % 3] == 'O' &&
+                    cliffStr[(-p.rotation + 3) % 3] == 'E' && cliffStr[(1 - p.rotation + 3) % 3] == 'E';
+            case Direction.Right:
+                return baseStr[(1 - p.rotation + 3) % 3] == 'O' && baseStr[(2 - p.rotation + 3) % 3] == 'O' &&
+                    cliffStr[(1 - p.rotation + 3) % 3] == 'E' && cliffStr[(2 - p.rotation + 3) % 3] == 'E';
+            default: // Direction.Left:
+                return baseStr[(2 - p.rotation + 3) % 3] == 'O' && baseStr[(-p.rotation + 3) % 3] == 'O' &&
+                    cliffStr[(2 - p.rotation + 3) % 3] == 'E' && cliffStr[(-p.rotation + 3) % 3] == 'E';
         }
     }
 

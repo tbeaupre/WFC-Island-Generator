@@ -7,7 +7,7 @@ using System.Linq;
 public class Main : MonoBehaviour
 {
     public static int height = 5;
-    public static int radius = 5;
+    public static int radius = 4;
     public int triangleSize = 2;
     WaveFunctionCollapse wfc;
     TileGrid tileGrid = new TileGrid(radius, height);
@@ -33,13 +33,17 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown("space"))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             StopAllCoroutines();
             cm.Clear();
             StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, 0.1f, (data, drawAll) => {
                 Draw(data, drawAll);
             }));
+        }
+        else if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
         }
     }
 

@@ -18,7 +18,17 @@ public class TraversalManager
     {
         Dictionary<Prototype, HashSet<Tile>> protoTraversalMap = new Dictionary<Prototype, HashSet<Tile>>();
 
-        List<Prototype> possibleProtos = OceanHelper.ReduceOceans(cell.tile, cell.prototypes);
+        List<Prototype> possibleProtos = OceanHelper.ReduceForEdges(cell.tile, cell.prototypes);
+        if (possibleProtos.Count == cell.prototypes.Count)
+        {
+            Prototype internalProto = cell.prototypes.Find(p => p.name == "III");
+            if (internalProto != null)
+            {
+                traversalMap.Add(cell.tile, new HashSet<Tile>());
+                return internalProto;
+            }
+        }
+        possibleProtos = OceanHelper.ReduceOceans(cell.tile, possibleProtos);
         possibleProtos = MountainHelper.RemoveLocalMinima(cell.tile, possibleProtos);
 
         if (cell.tile.y == 0) // Don't leave holes in the map.
