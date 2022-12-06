@@ -18,7 +18,7 @@ public class Main : MonoBehaviour
     void Awake()
     {
         wfc = new WaveFunctionCollapse();
-        cm.Init();
+        cm.Init(transform);
     }
 
     // Start is called before the first frame update
