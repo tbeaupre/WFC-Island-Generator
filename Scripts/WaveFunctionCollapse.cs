@@ -23,6 +23,9 @@ public class WaveFunctionCollapse
     int height;
     TraversalManager tm;
 
+    public delegate void FinishIsland();
+    public static event FinishIsland OnFinishIsland;
+
     public IEnumerator CollapseCo(TileGrid tileGrid, List<Prototype> prototypes, int height, float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
     {
         this.tileGrid = tileGrid;
@@ -36,14 +39,15 @@ public class WaveFunctionCollapse
             if (!Iterate())
             {
                 Debug.Log("Iteration failed. Trying again...");
-                callback(data, true);
-                yield break;
                 InitializeData();
+                //callback(data, true);
+                //yield break;
             }
             callback(data, false);
             yield return new WaitForSeconds(timeBetweenSteps);
         }
 
+        OnFinishIsland?.Invoke();
     }
 
     public void InitializeData()
