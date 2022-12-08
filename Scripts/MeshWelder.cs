@@ -41,8 +41,6 @@ public class MeshWelder : MonoBehaviour
         Vector3[] verts = mesh.vertices;
         Vector3[] normals = mesh.normals;
         List<int> newVertIndices = new List<int>();
-        List<int> newVertsCount = new List<int>();
-        List<Vector3> newNormalSum = new List<Vector3>();
         int[] map = new int[verts.Length];
 
         // Create mapping and filter duplicates.
@@ -55,12 +53,10 @@ public class MeshWelder : MonoBehaviour
             {
                 int a = newVertIndices[i2];
                 if ((verts[a] - p).sqrMagnitude <= tolerance &&
-                    Vector3.Angle(normals[a], n) <= 61)
+                    Vector3.Angle(normals[a], n) <= tolerance)
                 {
                     map[i] = i2;
                     duplicate = true;
-                    newVertsCount[i2]++;
-                    newNormalSum[i2] += n;
                     break;
                 }
             }
@@ -68,12 +64,10 @@ public class MeshWelder : MonoBehaviour
             {
                 map[i] = newVertIndices.Count;
                 newVertIndices.Add(i);
-                newVertsCount.Add(1);
-                newNormalSum.Add(new Vector3(normals[i].x, normals[i].y, normals[i].z));
             }
         }
 
-        Debug.Log($"Duplicate count: {newVertsCount.Where(i => i > 1).Count()}");
+        Debug.Log($"Duplicate count: {verts.Length - newVertIndices.Count}");
 
         // Create new vertices
         Vector3[] verts2 = new Vector3[newVertIndices.Count];
@@ -82,7 +76,7 @@ public class MeshWelder : MonoBehaviour
         {
             int index = newVertIndices[i];
             verts2[i] = verts[index];
-            normals2[i] = newNormalSum[i] / newVertsCount[i]; // Average the normals of welded vertices
+            normals2[i] = normals[index];
         }
 
         // Map the triangle to the new vertices
