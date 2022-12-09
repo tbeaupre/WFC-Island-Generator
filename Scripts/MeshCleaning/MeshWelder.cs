@@ -3,40 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
+[RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 public class MeshWelder : MonoBehaviour
 {
-    private void OnEnable()
-    {
-        WaveFunctionCollapse.OnFinishIsland += Weld;
-    }
-
     public void Weld()
     {
+        MeshFilter mf = gameObject.GetComponent<MeshFilter>();
+        mf.mesh = new Mesh();
+
         MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
-        CombineInstance[] combine = new CombineInstance[meshFilters.Length];
+        CombineInstance[] combine = new CombineInstance[meshFilters.Length - 1];
 
         int vertCount = 0;
 
-        for (int i = 0; i < meshFilters.Length; ++i)
+        for (int i = 1; i < meshFilters.Length; ++i)
         {
             meshFilters[i].mesh.SetTriangles(meshFilters[i].mesh.triangles, 0);
             vertCount += meshFilters[i].mesh.vertexCount;
-            combine[i].mesh = meshFilters[i].sharedMesh;
-            combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+            combine[i - 1].mesh = meshFilters[i].sharedMesh;
+            combine[i - 1].transform = meshFilters[i].transform.localToWorldMatrix;
             meshFilters[i].gameObject.SetActive(false);
         }
 
-        MeshFilter mf = gameObject.AddComponent<MeshFilter>();
-        mf.mesh = new Mesh();
         mf.mesh.CombineMeshes(combine);
 
         WeldVertices(mf.mesh);
 
         Debug.Log($"Uncombined Vert Count: {vertCount};  Combined Vert Count: {mf.mesh.vertexCount}");
-
-        MeshSmoother smoother = new MeshSmoother(mf.mesh);
-        smoother.Smooth(50, 0.05f);
     }
 
     public static void WeldVertices(Mesh mesh, float tolerance = 0.001f)
