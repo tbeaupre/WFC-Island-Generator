@@ -34,6 +34,9 @@ public class MeshWelder : MonoBehaviour
         WeldVertices(mf.mesh);
 
         Debug.Log($"Uncombined Vert Count: {vertCount};  Combined Vert Count: {mf.mesh.vertexCount}");
+
+        MeshSmoother smoother = new MeshSmoother(mf.mesh);
+        smoother.Smooth(50, 0.05f);
     }
 
     public static void WeldVertices(Mesh mesh, float tolerance = 0.001f)
