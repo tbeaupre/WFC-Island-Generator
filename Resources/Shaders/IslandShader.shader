@@ -2,8 +2,10 @@ Shader "Custom/IslandShader"
 {
     Properties
     {
-        _Color("Color", Color) = (1,1,1,1)
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
+        _GrassColor ("Grass Color", Color) = (0.527, 0.594, 0.414, 1)
+        _CliffColor("Cliff Color", Color) = (0.602, 0.617, 0.648, 1)
+        _OceanColor("Ocean Color", Color) = (0.133, 0.363, 0.477, 1)
+        _Glossiness ("Smoothness", Range(0,1)) = 0.0
         _Metallic ("Metallic", Range(0,1)) = 0.0
     }
     SubShader
@@ -28,7 +30,9 @@ Shader "Custom/IslandShader"
 
         half _Glossiness;
         half _Metallic;
-        fixed4 _Color;
+        fixed4 _GrassColor;
+        fixed4 _CliffColor;
+        fixed4 _OceanColor;
 
         // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
         // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
@@ -41,14 +45,14 @@ Shader "Custom/IslandShader"
         {
             if (IN.worldPos.y < 0.065f)
             {
-                o.Albedo = float3(34/256.0f, 93/256.0f, 122/256.0f);
+                o.Albedo = _OceanColor.rgb;
             }
             else
             {
                 if (IN.worldNormal.y > 0.9f)
-                    o.Albedo = float3(135/256.0f, 152/256.0f, 106/256.0f);
+                    o.Albedo = _GrassColor.rgb;
                 else
-                    o.Albedo = float3(154/256.0f, 158/256.0f, 166/256.0f);
+                    o.Albedo = _CliffColor.rgb;
             }
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
