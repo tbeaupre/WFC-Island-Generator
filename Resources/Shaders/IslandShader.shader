@@ -7,6 +7,8 @@ Shader "Custom/IslandShader"
         _OceanColor("Ocean Color", Color) = (0.133, 0.363, 0.477, 1)
         _Glossiness ("Smoothness", Range(0,1)) = 0.0
         _Metallic ("Metallic", Range(0,1)) = 0.0
+        _OutlineColor("Outline Color", Color) = (0, 0, 0, 1)
+        _OutlineWidth("Outline Width", Range(0, 1)) = 0.03
     }
     SubShader
     {
@@ -60,6 +62,37 @@ Shader "Custom/IslandShader"
             o.Alpha = 1.0f;
         }
         ENDCG
+
+        Pass {
+            Cull Front
+
+            CGPROGRAM
+
+            #pragma vertex VertexProgram
+            #pragma fragment FragmentProgram
+
+            half _OutlineWidth;
+
+            float4 VertexProgram(
+                    float4 position : POSITION,
+                    float3 normal : NORMAL) : SV_POSITION {
+
+                float4 clipPosition = UnityObjectToClipPos(position);
+                float3 clipNormal = mul((float3x3) UNITY_MATRIX_VP, mul((float3x3) UNITY_MATRIX_M, normal));
+
+                clipPosition.xyz += normalize(clipNormal) * _OutlineWidth;
+
+                return clipPosition;
+            }
+
+            half4 _OutlineColor;
+
+            half4 FragmentProgram() : SV_TARGET {
+                return _OutlineColor;
+            }
+
+            ENDCG
+        }
     }
     FallBack "Diffuse"
 }
