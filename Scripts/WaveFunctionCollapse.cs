@@ -21,7 +21,6 @@ public class WaveFunctionCollapse
     TileGrid tileGrid;
     List<Prototype> prototypes;
     int height;
-    TraversalManager tm;
 
     public delegate void FinishIsland();
     public static event FinishIsland OnFinishIsland;
@@ -40,7 +39,7 @@ public class WaveFunctionCollapse
             {
                 Debug.Log("Iteration failed. Trying again...");
                 InitializeData();
-                //callback(data, true);
+                //callback(data, false);
                 //yield break;
             }
             callback(data, false);
@@ -68,7 +67,7 @@ public class WaveFunctionCollapse
         {
             data.Add(t, new Cell(t, prototypes));
         }
-        tm = new TraversalManager(tileGrid);
+        TraversalManager.Init(tileGrid);
         OceanHelper.Init(tileGrid, data);
     }
 
@@ -85,7 +84,7 @@ public class WaveFunctionCollapse
         {
             if (cell.tile.y < height - 1)
                 continue;
-            cell.CollapseTo(tm, "EEE");
+            cell.CollapseTo("EEE");
             if (!Propagate(cell))
                 return false;
         }
@@ -96,7 +95,7 @@ public class WaveFunctionCollapse
     {
         Cell cell = GetNextCell();
         // Debug.Log($"{cell.tile.a}, {cell.tile.b}, {cell.tile.c}, {cell.tile.y}");
-        cell.Collapse(tm);
+        cell.Collapse();
         return Propagate(cell);
     }
 

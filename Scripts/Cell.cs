@@ -18,18 +18,18 @@ public class Cell
     public bool IsCollapsed => prototypes.Count == 1;
     public int Entropy => prototypes.Count;
 
-    public void Collapse(TraversalManager tm)
+    public void Collapse()
     {
-        Prototype selected = tm.PickTraversalWeightedPrototype(this);
+        Prototype selected = PrototypePicker.PickPrototype(this);
         prototypes = new List<Prototype> { selected };
     }
 
-    public void CollapseTo(TraversalManager tm, string prototypeName)
+    public void CollapseTo(string prototypeName)
     {
         Prototype proto = prototypes.Find(p => p.name == prototypeName);
         prototypes = new List<Prototype>();
         prototypes.Add(proto);
-        tm.SetTilePrototype(tile, proto);
+        TraversalManager.SetTilePrototype(tile, proto);
     }
 
     public void Constrain(Prototype prototype)

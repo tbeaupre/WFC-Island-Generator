@@ -3,44 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class TraversalManager
+public static class TraversalManager
 {
-    TileGrid tileGrid;
-    Dictionary<Tile, HashSet<Tile>> traversalMap;
+    static TileGrid tileGrid;
+    static Dictionary<Tile, HashSet<Tile>> traversalMap = new Dictionary<Tile, HashSet<Tile>>();
 
-    public TraversalManager(TileGrid tileGrid)
+    public static void Init(TileGrid _tileGrid)
     {
-        this.tileGrid = tileGrid;
+        tileGrid = _tileGrid;
         traversalMap = new Dictionary<Tile, HashSet<Tile>>();
     }
 
-    public Prototype PickTraversalWeightedPrototype(Cell cell)
+    public static Prototype PickTraversalWeightedPrototype(Tile tile, List<Prototype> possibleProtos)
     {
         Dictionary<Prototype, HashSet<Tile>> protoTraversalMap = new Dictionary<Prototype, HashSet<Tile>>();
 
-        List<Prototype> possibleProtos = OceanHelper.ReduceForEdges(cell.tile, cell.prototypes);
-        if (possibleProtos.Count == cell.prototypes.Count)
-        {
-            Prototype internalProto = cell.prototypes.Find(p => p.name == "III");
-            if (internalProto != null)
-            {
-                traversalMap.Add(cell.tile, new HashSet<Tile>());
-                return internalProto;
-            }
-        }
-        possibleProtos = OceanHelper.ReduceOceans(cell.tile, possibleProtos);
-        possibleProtos = MountainHelper.RemoveLocalMinima(cell.tile, possibleProtos);
-
-        if (cell.tile.y == 0) // Don't leave holes in the map.
-        {
-            possibleProtos = possibleProtos.Where(p => !IsPrototypeOpenOnBottom(p)).ToList();
-            if (possibleProtos.Count == 0)
-                Debug.Log(cell.prototypes);
-        }
-
         foreach (Prototype p in possibleProtos)
         {
-            protoTraversalMap.Add(p, GetAllReachableTiles(cell.tile, p));
+            protoTraversalMap.Add(p, GetAllReachableTiles(tile, p));
         }
 
         int sumOfWeights = 0;
@@ -55,7 +35,7 @@ public class TraversalManager
             currentValue += 1 + protoTraversalMap[p].Count;
             if (currentValue > target)
             {
-                AddPickToTraversalMap(cell.tile, protoTraversalMap[p]);
+                AddPickToTraversalMap(tile, protoTraversalMap[p]);
                 return p;
             }
         }
@@ -63,12 +43,12 @@ public class TraversalManager
         return null;
     }
 
-    public void SetTilePrototype(Tile t, Prototype p)
+    public static void SetTilePrototype(Tile t, Prototype p)
     {
         AddPickToTraversalMap(t, GetAllReachableTiles(t, p));
     }
 
-    void AddPickToTraversalMap(Tile t, HashSet<Tile> reachableTiles)
+    static void AddPickToTraversalMap(Tile t, HashSet<Tile> reachableTiles)
     {
         foreach (Tile reachableTile in reachableTiles)
         {
@@ -77,7 +57,7 @@ public class TraversalManager
         traversalMap.Add(t, reachableTiles);
     }
 
-    HashSet<Tile> GetAllReachableTiles(Tile t, Prototype p)
+    static HashSet<Tile> GetAllReachableTiles(Tile t, Prototype p)
     {
         HashSet<Tile> reachableTiles = new HashSet<Tile>();
         if (p.traversalSet.back)
@@ -93,23 +73,11 @@ public class TraversalManager
         return reachableTiles;
     }
 
-    HashSet<Tile> GetReachableTilesInDirection(Tile t, Direction direction)
+    static HashSet<Tile> GetReachableTilesInDirection(Tile t, Direction direction)
     {
         Tile neighbor = tileGrid.GetNeighbor(t, direction);
         if (!(neighbor is null) && traversalMap.ContainsKey(neighbor))
             return traversalMap[neighbor];
         return new HashSet<Tile>();
-    }
-
-    private bool IsPrototypeOpenOnBottom(Prototype p)
-    {
-        if (p.meshName.Length == 0)
-            return p.name == "EEE";
-
-        string baseStr = p.meshName.Split('-')[0];
-        if (baseStr.Contains('E'))
-            return true;
-
-        return false;
     }
 }
