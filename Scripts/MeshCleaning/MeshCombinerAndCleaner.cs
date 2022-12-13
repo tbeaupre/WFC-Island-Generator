@@ -13,6 +13,6 @@ public class MeshCombinerAndCleaner : MonoBehaviour
     {
         GetComponent<MeshWelder>().Weld();
         MeshSmoother smoother = new MeshSmoother(GetComponent<MeshFilter>().mesh);
-        smoother.Smooth(50, 0.05f);
+        smoother.Smooth(10, 0.05f);
     }
 }

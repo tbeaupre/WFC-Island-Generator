@@ -92,19 +92,27 @@ public class MeshSmoother
     void Smooth(float weight)
     {
         Vector3[] verts = mesh.vertices;
+        Vector3[] normals = mesh.normals;
         Vector3[] newVerts = new Vector3[verts.Length];
+        Vector3[] newNormals = new Vector3[verts.Length];
+
         for (int i = 0; i < verts.Length; ++i)
         {
             Vector3 sumNeighborPos = Vector3.zero;
+            Vector3 sumNeighborNormals = Vector3.zero;
             HashSet<int> neighbors = connectionMap[combinedVertIndices[indexMap[i]]];
             foreach (int neighborIndex in neighbors)
             {
                 sumNeighborPos += verts[neighborIndex];
+                sumNeighborNormals += normals[neighborIndex];
             }
             Vector3 aveNeighborPos = sumNeighborPos / neighbors.Count;
+            Vector3 aveNeighborNormal = sumNeighborNormals / neighbors.Count;
             newVerts[i] = verts[i] + (weight * (aveNeighborPos - verts[i]));
+            newNormals[i] = normals[i] + (weight / 2 * (aveNeighborNormal - normals[i]));
         }
 
         mesh.vertices = newVerts;
+        mesh.normals = newNormals;
     }
 }

@@ -51,7 +51,7 @@ Shader "Custom/IslandShader"
             }
             else
             {
-                if (IN.worldNormal.y > 0.9f)
+                if (IN.worldNormal.y > 0.8f)
                     o.Albedo = _GrassColor.rgb;
                 else
                     o.Albedo = _CliffColor.rgb;

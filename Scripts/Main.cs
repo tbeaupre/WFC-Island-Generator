@@ -7,7 +7,7 @@ using System.Linq;
 public class Main : MonoBehaviour
 {
     public static int height = 5;
-    public static int radius = 4;
+    public static int radius = 5;
     public int triangleSize = 2;
     WaveFunctionCollapse wfc;
     TileGrid tileGrid = new TileGrid(radius, height);
