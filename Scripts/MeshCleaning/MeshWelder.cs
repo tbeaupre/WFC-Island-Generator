@@ -19,7 +19,6 @@ public class MeshWelder : MonoBehaviour
 
         for (int i = 1; i < meshFilters.Length; ++i)
         {
-            meshFilters[i].mesh.SetTriangles(meshFilters[i].mesh.triangles, 0);
             vertCount += meshFilters[i].mesh.vertexCount;
             combine[i - 1].mesh = meshFilters[i].sharedMesh;
             combine[i - 1].transform = meshFilters[i].transform.localToWorldMatrix;

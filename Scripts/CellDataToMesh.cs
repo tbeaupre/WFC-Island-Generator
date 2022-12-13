@@ -13,12 +13,14 @@ public class CellDataToMesh : MonoBehaviour
     bool debug = false;
     bool isCollapsed = false;
     float yScaling = 0.5f;
-    private Dictionary<string, GameObject> namePrefabMap = new Dictionary<string, GameObject>();
+    private Dictionary<string, Mesh> namePrefabMap = new Dictionary<string, Mesh>();
+    private GameObject tilePrefab;
 
-    public void Init(Dictionary<string, GameObject> namePrefabMap, Cell cell)
+    public void Init(Dictionary<string, Mesh> namePrefabMap, GameObject tilePrefab, Cell cell)
     {
         this.cell = cell;
         this.namePrefabMap = namePrefabMap;
+        this.tilePrefab = tilePrefab;
 
         transform.position = cell.tile.GetCenter();
 
@@ -128,7 +130,16 @@ public class CellDataToMesh : MonoBehaviour
 
     GameObject CreateMeshObject(string meshName)
     {
-        GameObject go = Instantiate(namePrefabMap[meshName], transform);
+        GameObject go;
+        if (meshName == "Interior")
+        {
+            go = Instantiate(Resources.Load<GameObject>("Prefabs/Interior"), transform);
+        }
+        else
+        {
+            go = Instantiate(tilePrefab, transform);
+            go.GetComponent<MeshFilter>().mesh = namePrefabMap[meshName];
+        }
         go.transform.localScale = new Vector3(1, yScaling, 1);
         return go;
     }

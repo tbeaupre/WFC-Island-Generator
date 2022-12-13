@@ -5,20 +5,21 @@ using System.Linq;
 
 public class CellManager
 {
+    private GameObject tilePrefab;
     private Transform rootTransform;
-    private Dictionary<string, GameObject> namePrefabMap = new Dictionary<string, GameObject>();
+    private Dictionary<string, Mesh> nameMeshMap = new Dictionary<string, Mesh>();
     private Dictionary<Cell, CellDataToMesh> cellDataMap = new Dictionary<Cell, CellDataToMesh>();
 
     public void Init(Transform rootTransform)
     {
-        GameObject parent = Resources.Load<GameObject>("Meshes/modules");
-        foreach (Transform child in parent.transform)
+        List<Mesh> meshes = new List<Mesh>(Resources.LoadAll<Mesh>("Meshes"));
+        foreach (Mesh mesh in meshes)
         {
-            namePrefabMap.Add(child.name, child.gameObject);
+            nameMeshMap.Add(mesh.name, mesh);
+            mesh.SetTriangles(mesh.triangles, 0);
         }
-        namePrefabMap.Add("Interior", Resources.Load<GameObject>("Prefabs/Interior"));
-        namePrefabMap.Add("Exterior", Resources.Load<GameObject>("Prefabs/Exterior"));
-        Debug.Log($"namePrefabMap count: {namePrefabMap.Count}");
+
+        tilePrefab = Resources.Load<GameObject>("Prefabs/Tile");
 
         this.rootTransform = rootTransform;
     }
@@ -62,6 +63,6 @@ public class CellManager
         parent.transform.parent = rootTransform;
         CellDataToMesh cdtm = parent.AddComponent<CellDataToMesh>();
         cellDataMap.Add(cell, cdtm);
-        cdtm.Init(namePrefabMap, cell);
+        cdtm.Init(nameMeshMap, tilePrefab, cell);
     }
 }
