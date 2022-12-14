@@ -10,7 +10,6 @@ public class MeshWelder : MonoBehaviour
     public void Weld()
     {
         MeshFilter mf = gameObject.GetComponent<MeshFilter>();
-        mf.mesh = new Mesh();
 
         MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
         CombineInstance[] combine = new CombineInstance[meshFilters.Length - 1];

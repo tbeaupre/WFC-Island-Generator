@@ -6,7 +6,13 @@ public class MeshCombinerAndCleaner : MonoBehaviour
 {
     private void OnEnable()
     {
+        WaveFunctionCollapse.OnStartIsland += Init;
         WaveFunctionCollapse.OnFinishIsland += CombineAndCleanMesh;
+    }
+
+    public void Init()
+    {
+        gameObject.GetComponent<MeshFilter>().mesh = new Mesh();
     }
 
     public void CombineAndCleanMesh()

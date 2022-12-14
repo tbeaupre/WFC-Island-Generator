@@ -22,6 +22,9 @@ public class WaveFunctionCollapse
     List<Prototype> prototypes;
     int height;
 
+    public delegate void StartIsland();
+    public static event StartIsland OnStartIsland;
+
     public delegate void FinishIsland();
     public static event FinishIsland OnFinishIsland;
 
@@ -32,6 +35,8 @@ public class WaveFunctionCollapse
         this.height = height;
 
         InitializeDataStructure();
+
+        OnStartIsland?.Invoke();
 
         while (!IsCollapsed())
         {
