@@ -31,14 +31,14 @@ public class WaveFunctionCollapse
         this.prototypes = prototypes;
         this.height = height;
 
-        InitializeData();
+        InitializeDataStructure();
 
         while (!IsCollapsed())
         {
             if (!Iterate())
             {
                 Debug.Log("Iteration failed. Trying again...");
-                InitializeData();
+                InitializeDataStructure();
                 //callback(data, false);
                 //yield break;
             }
@@ -47,17 +47,6 @@ public class WaveFunctionCollapse
         }
 
         OnFinishIsland?.Invoke();
-    }
-
-    public void InitializeData()
-    {
-        InitializeDataStructure();
-
-        while (!SetUpOceansAndSkies())
-        {
-            Debug.Log("Failed to initialize oceans and skies. Trying again...");
-            InitializeDataStructure();
-        }
     }
 
     void InitializeDataStructure()
@@ -69,26 +58,6 @@ public class WaveFunctionCollapse
         }
         TraversalManager.Init(tileGrid);
         OceanHelper.Init(tileGrid, data);
-    }
-
-    bool SetUpOceansAndSkies()
-    {
-        if (!CreateSkies())
-            return false;
-        return true;
-    }
-
-    bool CreateSkies()
-    {
-        foreach (Cell cell in data.Values)
-        {
-            if (cell.tile.y < height - 1)
-                continue;
-            cell.CollapseTo("EEE");
-            if (!Propagate(cell))
-                return false;
-        }
-        return true;
     }
 
     public bool Iterate()

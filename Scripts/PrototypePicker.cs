@@ -7,7 +7,8 @@ public static class PrototypePicker
 {
     public static Prototype PickPrototype(Cell cell)
     {
-        List<Prototype> possibleProtos = OceanHelper.ReduceForEdges(cell.tile, cell.prototypes);
+        List<Prototype> possibleProtos = SkyHelper.ReduceForEdges(cell.tile, cell.prototypes);
+        possibleProtos = OceanHelper.ReduceForEdges(cell.tile, possibleProtos);
         if (possibleProtos.Count == cell.prototypes.Count)
         {
             Prototype internalProto = cell.prototypes.Find(p => p.name == "III");
