@@ -16,6 +16,16 @@ public class CellDataToMesh : MonoBehaviour
     private Dictionary<string, Mesh> namePrefabMap = new Dictionary<string, Mesh>();
     private GameObject tilePrefab;
 
+    public void Clear()
+    {
+        for (int i = 0; i < transform.childCount; ++i)
+        {
+            GameObject.Destroy(transform.GetChild(i).gameObject);
+        }
+        isCollapsed = false;
+        prototypeNames = new List<string>();
+    }
+
     public void Init(Dictionary<string, Mesh> namePrefabMap, GameObject tilePrefab, Cell cell)
     {
         this.cell = cell;
@@ -114,7 +124,7 @@ public class CellDataToMesh : MonoBehaviour
     public GameObject CreateMeshObjectAtPoints(string meshName, Vector3 p1, Vector3 p2)
     {
         GameObject go = CreateMeshObjectAtPoint(meshName, p1);
-        MeshTransformer mt = go.AddComponent<MeshTransformer>();
+        MeshTransformer mt = go.GetComponent<MeshTransformer>();
         mt.Init();
         mt.StretchXTowardsPoint(p2);
 

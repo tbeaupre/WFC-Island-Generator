@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class CellManager
+public static class CellManager
 {
-    private GameObject tilePrefab;
-    private Transform rootTransform;
-    private Dictionary<string, Mesh> nameMeshMap = new Dictionary<string, Mesh>();
-    private Dictionary<Cell, CellDataToMesh> cellDataMap = new Dictionary<Cell, CellDataToMesh>();
+    private static GameObject tilePrefab;
+    private static Transform rootTransform;
+    private static Dictionary<string, Mesh> nameMeshMap = new Dictionary<string, Mesh>();
+    private static Dictionary<Tile, CellDataToMesh> tileCellMap = new Dictionary<Tile, CellDataToMesh>();
 
-    public void Init(Transform rootTransform)
+    public static void Init(Transform _rootTransform)
     {
         List<Mesh> meshes = new List<Mesh>(Resources.LoadAll<Mesh>("Meshes"));
         foreach (Mesh mesh in meshes)
@@ -21,48 +21,39 @@ public class CellManager
 
         tilePrefab = Resources.Load<GameObject>("Prefabs/Tile");
 
-        this.rootTransform = rootTransform;
+        rootTransform = _rootTransform;
     }
 
-    public void Clear()
+    public static void Clear()
     {
-        foreach (CellDataToMesh cdtm in cellDataMap.Values)
+        foreach (CellDataToMesh cdtm in tileCellMap.Values)
         {
-            GameObject.Destroy(cdtm.gameObject);
+            cdtm.Clear();
         }
-        cellDataMap.Clear();
     }
 
-    public void UpdateCells(List<Cell> cells, bool drawAll)
+    public static void UpdateCells(List<Cell> cells, bool drawAll)
     {
-        List<Cell> toBeDeleted = cellDataMap.Keys.ToList();
-        cells.ForEach(cell => toBeDeleted.Remove(cell));
-        foreach (Cell key in toBeDeleted)
-        {
-            GameObject.Destroy(cellDataMap[key].gameObject);
-            cellDataMap.Remove(key);
-        }
-
         foreach (Cell cell in cells)
         {
             CreateOrUpdateMeshFromCell(cell, drawAll);
         }
     }
 
-    void CreateOrUpdateMeshFromCell(Cell cell, bool drawAll)
+    static void CreateOrUpdateMeshFromCell(Cell cell, bool drawAll)
     {
-        if (cellDataMap.ContainsKey(cell))
-            cellDataMap[cell].UpdateVisuals(cell, drawAll);
+        if (tileCellMap.ContainsKey(cell.tile))
+            tileCellMap[cell.tile].UpdateVisuals(cell, drawAll);
         else
             CreateMeshFromCell(cell);
     }
 
-    void CreateMeshFromCell(Cell cell)
+    static void CreateMeshFromCell(Cell cell)
     {
         GameObject parent = new GameObject();
         parent.transform.parent = rootTransform;
         CellDataToMesh cdtm = parent.AddComponent<CellDataToMesh>();
-        cellDataMap.Add(cell, cdtm);
+        tileCellMap.Add(cell.tile, cdtm);
         cdtm.Init(nameMeshMap, tilePrefab, cell);
     }
 }

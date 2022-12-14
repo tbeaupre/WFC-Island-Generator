@@ -6,19 +6,19 @@ using System.Linq;
 
 public class Main : MonoBehaviour
 {
-    public static int height = 5;
-    public static int radius = 5;
+    public static int height = 6;
+    public static int radius = 4;
     public int triangleSize = 2;
     WaveFunctionCollapse wfc;
     TileGrid tileGrid = new TileGrid(radius, height);
-    CellManager cm = new CellManager();
+    float timeBetweenSteps = 0;
 
     private List<Prototype> prototypes;
 
     void Awake()
     {
         wfc = new WaveFunctionCollapse();
-        cm.Init(transform);
+        CellManager.Init(transform);
     }
 
     // Start is called before the first frame update
@@ -26,7 +26,7 @@ public class Main : MonoBehaviour
     {
         prototypes = ModuleLoader.GetPrototypesFromFile();
 
-        StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, 0.1f, (data, drawAll) => {
+        StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, timeBetweenSteps, (data, drawAll) => {
             Draw(data, drawAll);
         }));
     }
@@ -36,8 +36,7 @@ public class Main : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             StopAllCoroutines();
-            cm.Clear();
-            StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, 0.1f, (data, drawAll) => {
+            StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, timeBetweenSteps, (data, drawAll) => {
                 Draw(data, drawAll);
             }));
         }
@@ -49,6 +48,6 @@ public class Main : MonoBehaviour
 
     void Draw(Dictionary<Tile, Cell> data, bool drawAll)
     {
-        cm.UpdateCells(data.Values.ToList(), drawAll);
+        CellManager.UpdateCells(data.Values.ToList(), drawAll);
     }
 }

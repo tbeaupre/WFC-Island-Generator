@@ -56,6 +56,7 @@ public class WaveFunctionCollapse
 
     void InitializeDataStructure()
     {
+        CellManager.Clear();
         data = new Dictionary<Tile, Cell>();
         foreach (Tile t in tileGrid.tileMap.Values)
         {

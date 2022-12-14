@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class MeshTransformer : MonoBehaviour
 {
-    float EDGE_LENGTH = 1.73205f;
-    MeshFilter mf;
+    const float EDGE_LENGTH = 1.73205f;
+    Mesh mesh;
     Vector3[] origVerts;
     Vector3[] newVerts;
     float angle;
@@ -13,8 +13,8 @@ public class MeshTransformer : MonoBehaviour
 
     public void Init()
     {
-        mf = GetComponent<MeshFilter>();
-        origVerts = mf.mesh.vertices;
+        mesh = GetComponent<MeshFilter>().mesh;
+        origVerts = mesh.vertices;
         newVerts = new Vector3[origVerts.Length];
     }
 
@@ -31,7 +31,7 @@ public class MeshTransformer : MonoBehaviour
             pt.x *= scale;
             newVerts[i] = pt;
         }
-        mf.mesh.vertices = newVerts;
+        mesh.vertices = newVerts;
 
         transform.eulerAngles = new Vector3(0, angle, 0);
     }
@@ -46,7 +46,7 @@ public class MeshTransformer : MonoBehaviour
         float zDist = transform.position.z - rotatedTarget.z;
         float scale = zDist / 1.5f;
 
-        origVerts = mf.mesh.vertices;
+        origVerts = mesh.vertices;
         for (var i = 0; i < origVerts.Length; i++)
         {
             var pt = origVerts[i];
@@ -54,6 +54,6 @@ public class MeshTransformer : MonoBehaviour
             pt.z *= scale;
             newVerts[i] = pt;
         }
-        mf.mesh.vertices = newVerts;
+        mesh.vertices = newVerts;
     }
 }
