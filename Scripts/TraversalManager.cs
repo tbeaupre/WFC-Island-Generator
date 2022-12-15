@@ -5,12 +5,10 @@ using System.Linq;
 
 public static class TraversalManager
 {
-    static TileGrid tileGrid;
     static Dictionary<Tile, HashSet<Tile>> traversalMap = new Dictionary<Tile, HashSet<Tile>>();
 
-    public static void Init(TileGrid _tileGrid)
+    public static void Init()
     {
-        tileGrid = _tileGrid;
         traversalMap = new Dictionary<Tile, HashSet<Tile>>();
     }
 
@@ -75,7 +73,7 @@ public static class TraversalManager
 
     static HashSet<Tile> GetReachableTilesInDirection(Tile t, Direction direction)
     {
-        Tile neighbor = tileGrid.GetNeighbor(t, direction);
+        Tile neighbor = TileGrid.GetNeighbor(t, direction);
         if (!(neighbor is null) && traversalMap.ContainsKey(neighbor))
             return traversalMap[neighbor];
         return new HashSet<Tile>();

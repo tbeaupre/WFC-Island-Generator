@@ -5,12 +5,10 @@ using System.Linq;
 
 public class OceanHelper
 {
-    static TileGrid tileGrid;
     static Dictionary<Tile, Cell> data;
 
-    public static void Init(TileGrid newTg, Dictionary<Tile, Cell> newData)
+    public static void Init(Dictionary<Tile, Cell> newData)
     {
-        tileGrid = newTg;
         data = newData;
     }
 
@@ -24,7 +22,7 @@ public class OceanHelper
         Direction[] sides = new Direction[] { Direction.Back, Direction.Right, Direction.Left };
         foreach (Direction dir in sides)
         {
-            if (tileGrid.GetNeighbor(tile, dir) is null)
+            if (TileGrid.GetNeighbor(tile, dir) is null)
             {
                 result = result.Where(p => IsFullOceanPrototypeInDirection(p, dir)).ToList();
             }
@@ -43,7 +41,7 @@ public class OceanHelper
         Direction[] sides = new Direction[] { Direction.Back, Direction.Right, Direction.Left };
         foreach (Direction dir in sides)
         {
-            Tile neighborTile = tileGrid.GetNeighbor(tile, dir);
+            Tile neighborTile = TileGrid.GetNeighbor(tile, dir);
             if (neighborTile is null)
                 continue;
             if (IsOceanCell(data[neighborTile], dir))

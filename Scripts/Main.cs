@@ -10,13 +10,13 @@ public class Main : MonoBehaviour
     public static int radius = 4;
     public int triangleSize = 2;
     WaveFunctionCollapse wfc;
-    TileGrid tileGrid = new TileGrid(radius, height);
     float timeBetweenSteps = 0;
 
     private List<Prototype> prototypes;
 
     void Awake()
     {
+        TileGrid.Init(radius, height);
         wfc = new WaveFunctionCollapse();
         CellManager.Init(transform);
     }
@@ -26,7 +26,7 @@ public class Main : MonoBehaviour
     {
         prototypes = ModuleLoader.GetPrototypesFromFile();
 
-        StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, timeBetweenSteps, (data, drawAll) => {
+        StartCoroutine(wfc.CollapseCo(prototypes, height, timeBetweenSteps, (data, drawAll) => {
             Draw(data, drawAll);
         }));
     }
@@ -36,7 +36,7 @@ public class Main : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             StopAllCoroutines();
-            StartCoroutine(wfc.CollapseCo(tileGrid, prototypes, height, timeBetweenSteps, (data, drawAll) => {
+            StartCoroutine(wfc.CollapseCo(prototypes, height, timeBetweenSteps, (data, drawAll) => {
                 Draw(data, drawAll);
             }));
         }

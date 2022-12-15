@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class TileGrid
+public static class TileGrid
 {
-    public List<Tile> tiles = new List<Tile>();
-    public Dictionary<(int, int, int, int), Tile> tileMap = new Dictionary<(int, int, int, int), Tile>();
+    public static Dictionary<(int, int, int, int), Tile> tileMap = new Dictionary<(int, int, int, int), Tile>();
 
-    public TileGrid(int radius, int height)
+    public static void Init(int radius, int height)
     {
         int min = -radius;
         int max = radius;
@@ -34,9 +33,9 @@ public class TileGrid
         }
     }
 
-    public Tile GetTile(int a, int b, int c, int y) => tileMap.ContainsKey((a, b, c, y)) ? tileMap[(a, b, c, y)] : null;
+    public static Tile GetTile(int a, int b, int c, int y) => tileMap.ContainsKey((a, b, c, y)) ? tileMap[(a, b, c, y)] : null;
 
-    public Tile GetNeighbor(Tile t, Direction dir)
+    public static Tile GetNeighbor(Tile t, Direction dir)
     {
         switch (dir)
         {

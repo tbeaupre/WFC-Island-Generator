@@ -23,7 +23,6 @@ public enum Direction
 public class WaveFunctionCollapse
 {
     Dictionary<Tile, Cell> data;
-    TileGrid tileGrid;
     List<Prototype> prototypes;
     int height;
 
@@ -37,10 +36,8 @@ public class WaveFunctionCollapse
     public static List<Prototype> topLevelPrototypes;
     public static List<Prototype> noOceans;
 
-    public IEnumerator CollapseCo(TileGrid tileGrid, List<Prototype> prototypes, int height, float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
+    public IEnumerator CollapseCo(List<Prototype> prototypes, int height, float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
     {
-        this.tileGrid = tileGrid;
-
         this.prototypes = prototypes;
         baseLevelPrototypes = prototypes.Where(p => MeshNameUtilities.IsBaseLevelPrototype(p)).ToList();
         topLevelPrototypes = prototypes.Where(p => MeshNameUtilities.IsTopLevelPrototype(p)).ToList();
@@ -74,12 +71,12 @@ public class WaveFunctionCollapse
     {
         CellManager.Clear();
         data = new Dictionary<Tile, Cell>();
-        foreach (Tile t in tileGrid.tileMap.Values)
+        foreach (Tile t in TileGrid.tileMap.Values)
         {
             data.Add(t, new Cell(t));
         }
-        TraversalManager.Init(tileGrid);
-        OceanHelper.Init(tileGrid, data);
+        TraversalManager.Init();
+        OceanHelper.Init(data);
     }
 
     public bool Iterate()
@@ -238,7 +235,7 @@ public class WaveFunctionCollapse
 
     Cell GetNeighborCell(Cell cell, Direction dir)
     {
-        Tile neighborTile = tileGrid.GetNeighbor(cell.tile, dir);
+        Tile neighborTile = TileGrid.GetNeighbor(cell.tile, dir);
         if (neighborTile is not null)
             return data[neighborTile];
         return null;
