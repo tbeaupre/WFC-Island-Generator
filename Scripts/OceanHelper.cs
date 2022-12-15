@@ -104,7 +104,7 @@ public class OceanHelper
         }
     }
 
-    static bool IsOceanPrototype(Prototype p)
+    public static bool IsOceanPrototype(Prototype p)
     {
         if (p.meshName.Length == 0)
             return false;

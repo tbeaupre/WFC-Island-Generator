@@ -9,10 +9,15 @@ public class Cell
     public Tile tile;
     public List<Prototype> prototypes;
 
-    public Cell(Tile tile, List<Prototype> prototypes)
+    public Cell(Tile tile)
     {
         this.tile = tile;
-        this.prototypes = new List<Prototype>(prototypes);
+        if (tile.y == 0)
+            this.prototypes = new List<Prototype>(WaveFunctionCollapse.baseLevelPrototypes);
+        else if (tile.y == Main.height - 1)
+            this.prototypes = new List<Prototype>(WaveFunctionCollapse.topLevelPrototypes);
+        else
+            this.prototypes = new List<Prototype>(WaveFunctionCollapse.noOceans);
     }
 
     public bool IsCollapsed => prototypes.Count == 1;

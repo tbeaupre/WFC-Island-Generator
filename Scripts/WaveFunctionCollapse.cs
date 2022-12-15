@@ -33,10 +33,19 @@ public class WaveFunctionCollapse
     public delegate void FinishIsland();
     public static event FinishIsland OnFinishIsland;
 
+    public static List<Prototype> baseLevelPrototypes;
+    public static List<Prototype> topLevelPrototypes;
+    public static List<Prototype> noOceans;
+
     public IEnumerator CollapseCo(TileGrid tileGrid, List<Prototype> prototypes, int height, float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
     {
         this.tileGrid = tileGrid;
+
         this.prototypes = prototypes;
+        baseLevelPrototypes = prototypes.Where(p => MeshNameUtilities.IsBaseLevelPrototype(p)).ToList();
+        topLevelPrototypes = prototypes.Where(p => MeshNameUtilities.IsTopLevelPrototype(p)).ToList();
+        noOceans = prototypes.Where(p => !OceanHelper.IsOceanPrototype(p)).ToList();
+
         this.height = height;
 
         InitializeDataStructure();
@@ -67,7 +76,7 @@ public class WaveFunctionCollapse
         data = new Dictionary<Tile, Cell>();
         foreach (Tile t in tileGrid.tileMap.Values)
         {
-            data.Add(t, new Cell(t, prototypes));
+            data.Add(t, new Cell(t));
         }
         TraversalManager.Init(tileGrid);
         OceanHelper.Init(tileGrid, data);
@@ -111,15 +120,15 @@ public class WaveFunctionCollapse
             }
 
             if (neighbors[0] is not null)
-                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(0, possibleNeighborSets[0], neighbors[0].prototypes.ToArray()))));
+                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(0, possibleNeighborSets[0], neighbors[0].prototypes))));
             if (neighbors[1] is not null)
-                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(1, possibleNeighborSets[1], neighbors[1].prototypes.ToArray()))));
+                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(1, possibleNeighborSets[1], neighbors[1].prototypes))));
             if (neighbors[2] is not null)
-                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(2, possibleNeighborSets[2], neighbors[2].prototypes.ToArray()))));
+                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(2, possibleNeighborSets[2], neighbors[2].prototypes))));
             if (neighbors[3] is not null)
-                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(3, possibleNeighborSets[3], neighbors[3].prototypes.ToArray()))));
+                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(3, possibleNeighborSets[3], neighbors[3].prototypes))));
             if (neighbors[4] is not null)
-                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(4, possibleNeighborSets[4], neighbors[4].prototypes.ToArray()))));
+                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(4, possibleNeighborSets[4], neighbors[4].prototypes))));
 
             Task.WaitAll(tasks.ToArray());
 
@@ -135,7 +144,6 @@ public class WaveFunctionCollapse
                     continue;
 
                 Cell neighbor = neighbors[output.i];
-                neighbor.prototypes = output.neighborPrototypes;
                 if (!stack.Contains(neighbor))
                     stack.Push(neighbor);
             }
@@ -151,30 +159,28 @@ public class WaveFunctionCollapse
         public int i;
         public bool wasSuccessful;
         public bool shouldPropagateToNeighbor;
-        public List<Prototype> neighborPrototypes;
 
-        public Output(int i, List<Prototype> neighborPrototypes)
+        public Output(int i)
         {
             this.i = i;
             this.wasSuccessful = false;
             this.shouldPropagateToNeighbor = false;
-            this.neighborPrototypes = neighborPrototypes;
         }
     }
 
-    static Output PropagateToNeighbors(int i, HashSet<string> possibleNeighbors, Prototype[] neighborPrototypes)
+    static Output PropagateToNeighbors(int i, HashSet<string> possibleNeighbors, List<Prototype> neighborPrototypes)
     {
-        Output output = new Output(i, new List<Prototype>(neighborPrototypes));
+        Output output = new Output(i);
 
-        if (neighborPrototypes.Length == 0)
+        if (neighborPrototypes.Count == 0)
             return output; // by default wasSuccessful is false
 
-        foreach (Prototype otherPrototype in neighborPrototypes)
+        foreach (Prototype otherPrototype in neighborPrototypes.ToArray())
         {
             if (!possibleNeighbors.Contains(otherPrototype.name))
             {
-                output.neighborPrototypes.Remove(otherPrototype);
-                if (output.neighborPrototypes.Count == 0)
+                neighborPrototypes.Remove(otherPrototype);
+                if (neighborPrototypes.Count == 0)
                     return output; // by default wasSuccessful is false
                 output.shouldPropagateToNeighbor = true;
             }
