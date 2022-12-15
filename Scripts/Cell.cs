@@ -1,17 +1,25 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Cell
 {
-    const int TRAVERSAL_MULTIPLIER = 10;
-
     public Tile tile;
     public List<Prototype> prototypes;
+    private Cell[] neighbors;
 
     public Cell(Tile tile)
     {
         this.tile = tile;
+        Reset();
+    }
+
+    public bool IsCollapsed => prototypes.Count == 1;
+    public int Entropy => prototypes.Count;
+
+    public void Reset()
+    {
         if (tile.y == 0)
             this.prototypes = new List<Prototype>(WaveFunctionCollapse.baseLevelPrototypes);
         else if (tile.y == Main.height - 1)
@@ -20,8 +28,24 @@ public class Cell
             this.prototypes = new List<Prototype>(WaveFunctionCollapse.noOceans);
     }
 
-    public bool IsCollapsed => prototypes.Count == 1;
-    public int Entropy => prototypes.Count;
+    public Cell[] GetNeighbors()
+    {
+        if (neighbors == null)
+            InitNeighbors();
+        return neighbors;
+    }
+
+    private void InitNeighbors()
+    {
+        Direction[] directions = (Direction[])Enum.GetValues(typeof(Direction));
+        neighbors = new Cell[directions.Length];
+        foreach (Direction dir in directions)
+        {
+            Tile neighborTile = TileGrid.GetNeighbor(tile, dir);
+            if (neighborTile is not null)
+                neighbors[(int)dir] = WaveFunctionCollapse.data[neighborTile];
+        }
+    }
 
     public void Collapse()
     {

@@ -3,9 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using System.Threading;
-using Unity.Collections;
-using Unity.Jobs;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
@@ -22,9 +19,8 @@ public enum Direction
 // TODO: Make edge cells FFF? Should make the island look a bit nicer.
 public class WaveFunctionCollapse
 {
-    Dictionary<Tile, Cell> data;
+    public static Dictionary<Tile, Cell> data;
     List<Prototype> prototypes;
-    int height;
 
     public delegate void StartIsland();
     public static event StartIsland OnStartIsland;
@@ -36,14 +32,12 @@ public class WaveFunctionCollapse
     public static List<Prototype> topLevelPrototypes;
     public static List<Prototype> noOceans;
 
-    public IEnumerator CollapseCo(List<Prototype> prototypes, int height, float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
+    public IEnumerator CollapseCo(List<Prototype> prototypes, float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
     {
         this.prototypes = prototypes;
         baseLevelPrototypes = prototypes.Where(p => MeshNameUtilities.IsBaseLevelPrototype(p)).ToList();
         topLevelPrototypes = prototypes.Where(p => MeshNameUtilities.IsTopLevelPrototype(p)).ToList();
         noOceans = prototypes.Where(p => !OceanHelper.IsOceanPrototype(p)).ToList();
-
-        this.height = height;
 
         InitializeDataStructure();
 
@@ -56,7 +50,7 @@ public class WaveFunctionCollapse
             if (!Iterate())
             {
                 Debug.Log("Iteration failed. Trying again...");
-                InitializeDataStructure();
+                ResetData();
                 //callback(data, false);
                 //yield break;
             }
@@ -76,7 +70,16 @@ public class WaveFunctionCollapse
             data.Add(t, new Cell(t));
         }
         TraversalManager.Init();
-        OceanHelper.Init(data);
+    }
+
+    void ResetData()
+    {
+        foreach (Cell cell in data.Values)
+        {
+            cell.Reset();
+        }
+        TraversalManager.Init();
+        CellManager.Clear();
     }
 
     public bool Iterate()
@@ -110,12 +113,7 @@ public class WaveFunctionCollapse
             tasks.Clear();
             outputs.Clear();
 
-            for (int i = 0; i < directions.Length; ++i)
-            {
-                Cell neighbor = GetNeighborCell(currentCell, directions[i]);
-                neighbors[i] = neighbor;
-            }
-
+            neighbors = currentCell.GetNeighbors();
             if (neighbors[0] is not null)
                 tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(0, possibleNeighborSets[0], neighbors[0].prototypes))));
             if (neighbors[1] is not null)
@@ -204,41 +202,6 @@ public class WaveFunctionCollapse
             result[4].UnionWith(p.validNeighbors.bottom);
         }
         return result;
-    }
-
-    HashSet<string> GetPossibleNeighbors(Cell cell, Direction dir)
-    {
-        HashSet<string> possibleNeighbors = new HashSet<string>();
-        foreach (Prototype p in cell.prototypes)
-        {
-            switch (dir)
-            {
-                case Direction.Back:
-                    possibleNeighbors.UnionWith(p.validNeighbors.back);
-                    break;
-                case Direction.Right:
-                    possibleNeighbors.UnionWith(p.validNeighbors.right);
-                    break;
-                case Direction.Left:
-                    possibleNeighbors.UnionWith(p.validNeighbors.left);
-                    break;
-                case Direction.Top:
-                    possibleNeighbors.UnionWith(p.validNeighbors.top);
-                    break;
-                case Direction.Bottom:
-                    possibleNeighbors.UnionWith(p.validNeighbors.bottom);
-                    break;
-            }
-        }
-        return possibleNeighbors;
-    }
-
-    Cell GetNeighborCell(Cell cell, Direction dir)
-    {
-        Tile neighborTile = TileGrid.GetNeighbor(cell.tile, dir);
-        if (neighborTile is not null)
-            return data[neighborTile];
-        return null;
     }
 
     public bool IsCollapsed()

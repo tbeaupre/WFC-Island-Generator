@@ -5,13 +5,6 @@ using System.Linq;
 
 public class OceanHelper
 {
-    static Dictionary<Tile, Cell> data;
-
-    public static void Init(Dictionary<Tile, Cell> newData)
-    {
-        data = newData;
-    }
-
     // Treat edges of the map like they're OOO-EEE
     public static List<Prototype> ReduceForEdges(Tile tile, List<Prototype> prototypes)
     {
@@ -44,7 +37,7 @@ public class OceanHelper
             Tile neighborTile = TileGrid.GetNeighbor(tile, dir);
             if (neighborTile is null)
                 continue;
-            if (IsOceanCell(data[neighborTile], dir))
+            if (IsOceanCell(WaveFunctionCollapse.data[neighborTile], dir))
             {
                 return noEmptyOcean;
             }
