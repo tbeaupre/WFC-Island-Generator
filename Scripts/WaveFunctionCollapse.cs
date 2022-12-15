@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Unity.Collections;
+using Unity.Jobs;
 
 public enum Direction
 {
@@ -83,35 +85,83 @@ public class WaveFunctionCollapse
         {
             Cell currentCell = stack.Pop();
 
-            Direction[] directions = (Direction[])Enum.GetValues(typeof(Direction));
-            foreach (Direction dir in directions)
+            var inputs = new NativeArray<ArrayTestJob.Input>(3, Allocator.TempJob);
+            var outputs = new NativeArray<ArrayTestJob.Output>(3, Allocator.TempJob);
+
+            var input = new ArrayTestJob.Input();
+            input.ints = 1;
+            inputs[0] = input;
+            inputs[1] = input;
+            inputs[2] = input;
+
+            ArrayTestJob jobData = new ArrayTestJob();
+            jobData.inputs = inputs;
+            jobData.outputs = outputs;
+
+            JobHandle handle = jobData.Schedule(outputs.Length, 1);
+
+            // Wait for the job to complete
+            handle.Complete();
+
+            for (int i = 0; i < outputs.Length; ++i)
             {
-                Cell neighbor = GetNeighborCell(currentCell, dir);
-                if (neighbor is null)
-                    continue;
-
-                List<Prototype> otherPossiblePrototypes = new List<Prototype>(neighbor.prototypes);
-
-                HashSet<string> possibleNeighbors = GetPossibleNeighbors(currentCell, dir);
-
-                if (otherPossiblePrototypes.Count == 0)
-                    continue;
-
-                foreach (Prototype otherPrototype in otherPossiblePrototypes)
-                {
-                    if (!possibleNeighbors.Contains(otherPrototype.name))
-                    {
-                        neighbor.Constrain(otherPrototype);
-                        if (neighbor.prototypes.Count == 0)
-                        {
-                            Debug.Log($"{neighbor.tile.a}, {neighbor.tile.b}, {neighbor.tile.c}, {neighbor.tile.y}");
-                            return false;
-                        }
-                        if (!stack.Contains(neighbor))
-                            stack.Push(neighbor);
-                    }
-                }
+                Debug.Log(outputs[i].ints);
             }
+
+            // Free the memory allocated by the arrays
+            inputs.Dispose();
+            outputs.Dispose();
+
+            //var input = new NativeArray<PropagateJob.PropagateInput>(5, Allocator.TempJob);
+            //var output = new NativeArray<PropagateJob.PropagateOutput>(5, Allocator.TempJob);
+
+            //Direction[] directions = (Direction[])Enum.GetValues(typeof(Direction));
+            //Cell[] neighbors = new Cell[directions.Length];
+            //for (int i = 0; i < directions.Length; ++i)
+            //{
+            //    var propagateInput = new PropagateJob.PropagateInput();
+            //    propagateInput.dir = directions[i];
+            //    propagateInput.cell = currentCell;
+
+            //    Cell neighbor = GetNeighborCell(currentCell, directions[i]);
+            //    neighbors[i] = neighbor;
+            //    if (neighbor is null)
+            //        propagateInput.neighborPrototypes = new List<Prototype>();
+            //    else
+            //        propagateInput.neighborPrototypes = neighbor.prototypes;
+
+            //    input[i] = propagateInput;
+            //}
+
+            //PropagateJob jobData = new PropagateJob();
+            //jobData.input = input;
+            //jobData.output = output;
+
+            //// Schedule the job with one Execute per index in the results array and only 1 item per processing batch
+            //JobHandle handle = jobData.Schedule(output.Length, 1);
+
+            //// Wait for the job to complete
+            //handle.Complete();
+
+            //for (int i = 0; i < output.Length; ++i)
+            //{
+            //    if (neighbors[i] is null)
+            //        continue;
+
+            //    if (!output[i].wasSuccessful)
+            //        return false;
+
+            //    if (!output[i].shouldPropagateToNeighbor)
+            //        continue;
+
+            //    neighbors[i].prototypes = output[i].neighborPrototypes;
+            //    if (!stack.Contains(neighbors[i]))
+            //        stack.Push(neighbors[i]);
+            //}
+
+            //// Free the memory allocated by the arrays
+            //input.Dispose();
+            //output.Dispose();
         }
         return true;
     }
