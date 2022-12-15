@@ -3,8 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.Threading;
 using Unity.Collections;
 using Unity.Jobs;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 public enum Direction
 {
@@ -39,6 +42,8 @@ public class WaveFunctionCollapse
         InitializeDataStructure();
 
         OnStartIsland?.Invoke();
+
+        Debug.Log("Starting");
 
         while (!IsCollapsed())
         {
@@ -80,90 +85,122 @@ public class WaveFunctionCollapse
     {
         Stack<Cell> stack = new Stack<Cell>();
         stack.Push(cell);
+        int iterations = 1;
+        HashSet<Cell> cellsAttempted = new HashSet<Cell>();
+
+        Direction[] directions = (Direction[])Enum.GetValues(typeof(Direction));
+        List<Task> tasks = new List<Task>();
+        Cell[] neighbors = new Cell[directions.Length];
+        ConcurrentBag<Output> outputs = new ConcurrentBag<Output>();
+
 
         while (stack.Count > 0)
         {
             Cell currentCell = stack.Pop();
+            ++iterations;
+            cellsAttempted.Add(currentCell);
 
-            var inputs = new NativeArray<ArrayTestJob.Input>(3, Allocator.TempJob);
-            var outputs = new NativeArray<ArrayTestJob.Output>(3, Allocator.TempJob);
+            HashSet<string>[] possibleNeighborSets = GetPossibleNeighbors(currentCell);
+            tasks.Clear();
+            outputs.Clear();
 
-            var input = new ArrayTestJob.Input();
-            input.ints = 1;
-            inputs[0] = input;
-            inputs[1] = input;
-            inputs[2] = input;
-
-            ArrayTestJob jobData = new ArrayTestJob();
-            jobData.inputs = inputs;
-            jobData.outputs = outputs;
-
-            JobHandle handle = jobData.Schedule(outputs.Length, 1);
-
-            // Wait for the job to complete
-            handle.Complete();
-
-            for (int i = 0; i < outputs.Length; ++i)
+            for (int i = 0; i < directions.Length; ++i)
             {
-                Debug.Log(outputs[i].ints);
+                Cell neighbor = GetNeighborCell(currentCell, directions[i]);
+                neighbors[i] = neighbor;
             }
 
-            // Free the memory allocated by the arrays
-            inputs.Dispose();
-            outputs.Dispose();
+            if (neighbors[0] is not null)
+                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(0, possibleNeighborSets[0], neighbors[0].prototypes.ToArray()))));
+            if (neighbors[1] is not null)
+                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(1, possibleNeighborSets[1], neighbors[1].prototypes.ToArray()))));
+            if (neighbors[2] is not null)
+                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(2, possibleNeighborSets[2], neighbors[2].prototypes.ToArray()))));
+            if (neighbors[3] is not null)
+                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(3, possibleNeighborSets[3], neighbors[3].prototypes.ToArray()))));
+            if (neighbors[4] is not null)
+                tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(4, possibleNeighborSets[4], neighbors[4].prototypes.ToArray()))));
 
-            //var input = new NativeArray<PropagateJob.PropagateInput>(5, Allocator.TempJob);
-            //var output = new NativeArray<PropagateJob.PropagateOutput>(5, Allocator.TempJob);
+            Task.WaitAll(tasks.ToArray());
 
-            //Direction[] directions = (Direction[])Enum.GetValues(typeof(Direction));
-            //Cell[] neighbors = new Cell[directions.Length];
-            //for (int i = 0; i < directions.Length; ++i)
-            //{
-            //    var propagateInput = new PropagateJob.PropagateInput();
-            //    propagateInput.dir = directions[i];
-            //    propagateInput.cell = currentCell;
+            foreach (Output output in outputs)
+            {
+                if (neighbors[output.i] is null)
+                    continue;
 
-            //    Cell neighbor = GetNeighborCell(currentCell, directions[i]);
-            //    neighbors[i] = neighbor;
-            //    if (neighbor is null)
-            //        propagateInput.neighborPrototypes = new List<Prototype>();
-            //    else
-            //        propagateInput.neighborPrototypes = neighbor.prototypes;
+                if (!output.wasSuccessful)
+                    return false;
 
-            //    input[i] = propagateInput;
-            //}
+                if (!output.shouldPropagateToNeighbor)
+                    continue;
 
-            //PropagateJob jobData = new PropagateJob();
-            //jobData.input = input;
-            //jobData.output = output;
-
-            //// Schedule the job with one Execute per index in the results array and only 1 item per processing batch
-            //JobHandle handle = jobData.Schedule(output.Length, 1);
-
-            //// Wait for the job to complete
-            //handle.Complete();
-
-            //for (int i = 0; i < output.Length; ++i)
-            //{
-            //    if (neighbors[i] is null)
-            //        continue;
-
-            //    if (!output[i].wasSuccessful)
-            //        return false;
-
-            //    if (!output[i].shouldPropagateToNeighbor)
-            //        continue;
-
-            //    neighbors[i].prototypes = output[i].neighborPrototypes;
-            //    if (!stack.Contains(neighbors[i]))
-            //        stack.Push(neighbors[i]);
-            //}
-
-            //// Free the memory allocated by the arrays
-            //input.Dispose();
-            //output.Dispose();
+                Cell neighbor = neighbors[output.i];
+                neighbor.prototypes = output.neighborPrototypes;
+                if (!stack.Contains(neighbor))
+                    stack.Push(neighbor);
+            }
         }
+
+        Debug.Log($"{iterations} iterations updating {cellsAttempted.Count} of {data.Values.Count} cells");
+
         return true;
+    }
+
+    class Output
+    {
+        public int i;
+        public bool wasSuccessful;
+        public bool shouldPropagateToNeighbor;
+        public List<Prototype> neighborPrototypes;
+
+        public Output(int i, List<Prototype> neighborPrototypes)
+        {
+            this.i = i;
+            this.wasSuccessful = false;
+            this.shouldPropagateToNeighbor = false;
+            this.neighborPrototypes = neighborPrototypes;
+        }
+    }
+
+    static Output PropagateToNeighbors(int i, HashSet<string> possibleNeighbors, Prototype[] neighborPrototypes)
+    {
+        Output output = new Output(i, new List<Prototype>(neighborPrototypes));
+
+        if (neighborPrototypes.Length == 0)
+            return output; // by default wasSuccessful is false
+
+        foreach (Prototype otherPrototype in neighborPrototypes)
+        {
+            if (!possibleNeighbors.Contains(otherPrototype.name))
+            {
+                output.neighborPrototypes.Remove(otherPrototype);
+                if (output.neighborPrototypes.Count == 0)
+                    return output; // by default wasSuccessful is false
+                output.shouldPropagateToNeighbor = true;
+            }
+        }
+
+        output.wasSuccessful = true;
+        return output;
+    }
+
+    HashSet<string>[] GetPossibleNeighbors(Cell cell)
+    {
+        var result = new HashSet<string>[5];
+        for (int i = 0; i < 5; ++i)
+        {
+            result[i] = new HashSet<string>();
+        }
+
+        foreach (Prototype p in cell.prototypes)
+        {
+            result[0].UnionWith(p.validNeighbors.back);
+            result[1].UnionWith(p.validNeighbors.right);
+            result[2].UnionWith(p.validNeighbors.left);
+            result[3].UnionWith(p.validNeighbors.top);
+            result[4].UnionWith(p.validNeighbors.bottom);
+        }
+        return result;
     }
 
     HashSet<string> GetPossibleNeighbors(Cell cell, Direction dir)
