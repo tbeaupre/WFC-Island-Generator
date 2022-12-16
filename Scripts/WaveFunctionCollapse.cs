@@ -123,8 +123,10 @@ public class WaveFunctionCollapse
         HashSet<Cell> cellsAttempted = new HashSet<Cell>();
 
         Direction[] directions = (Direction[])Enum.GetValues(typeof(Direction));
+#if !UNITY_WEBGL
         List<Task> tasks = new List<Task>();
-        Cell[] neighbors = new Cell[directions.Length];
+#endif
+        Cell[] neighbors;
         ConcurrentBag<Output> outputs = new ConcurrentBag<Output>();
 
 
@@ -135,10 +137,21 @@ public class WaveFunctionCollapse
             cellsAttempted.Add(currentCell);
 
             HashSet<int>[] possibleNeighborSets = GetPossibleNeighbors(currentCell);
+#if !UNITY_WEBGL
             tasks.Clear();
+#endif
             outputs.Clear();
 
             neighbors = currentCell.GetNeighbors();
+
+#if UNITY_WEBGL
+            for (int i = 0; i < directions.Length; ++i)
+            {
+                if (neighbors[i] is null)
+                    continue;
+                outputs.Add(PropagateToNeighbors(i, possibleNeighborSets[i], neighbors[i].prototypes));
+            }
+#else
             if (neighbors[0] is not null)
                 tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(0, possibleNeighborSets[0], neighbors[0].prototypes))));
             if (neighbors[1] is not null)
@@ -151,10 +164,12 @@ public class WaveFunctionCollapse
                 tasks.Add(Task.Factory.StartNew(() => outputs.Add(PropagateToNeighbors(4, possibleNeighborSets[4], neighbors[4].prototypes))));
 
             Task.WaitAll(tasks.ToArray());
+#endif
 
             foreach (Output output in outputs)
             {
-                if (neighbors[output.i] is null)
+                Cell neighbor = neighbors[output.i];
+                if (neighbor is null)
                     continue;
 
                 if (!output.wasSuccessful)
@@ -163,7 +178,6 @@ public class WaveFunctionCollapse
                 if (!output.shouldPropagateToNeighbor)
                     continue;
 
-                Cell neighbor = neighbors[output.i];
                 if (!stack.Contains(neighbor))
                     stack.Push(neighbor);
             }
