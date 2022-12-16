@@ -9,17 +9,15 @@ public class Cell
     public List<Prototype> prototypes;
     private Cell[] neighbors;
 
+    public Cell(Cell cell)
+    {
+        this.tile = cell.tile;
+        this.prototypes = new List<Prototype>(cell.prototypes);
+    }
+
     public Cell(Tile tile)
     {
         this.tile = tile;
-        Reset();
-    }
-
-    public bool IsCollapsed => prototypes.Count == 1;
-    public int Entropy => prototypes.Count;
-
-    public void Reset()
-    {
         if (tile.y == 0)
             this.prototypes = new List<Prototype>(WaveFunctionCollapse.baseLevelPrototypes);
         else if (tile.y == Main.height - 1)
@@ -27,6 +25,9 @@ public class Cell
         else
             this.prototypes = new List<Prototype>(WaveFunctionCollapse.noOceans);
     }
+
+    public bool IsCollapsed => prototypes.Count == 1;
+    public int Entropy => prototypes.Count;
 
     public Cell[] GetNeighbors()
     {

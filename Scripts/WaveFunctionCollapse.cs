@@ -20,6 +20,7 @@ public enum Direction
 public class WaveFunctionCollapse
 {
     public static Dictionary<Tile, Cell> data;
+    private static Dictionary<Tile, Cell> cachedData;
     List<Prototype> prototypes;
 
     public delegate void StartIsland();
@@ -45,6 +46,17 @@ public class WaveFunctionCollapse
 
         Debug.Log("Starting");
 
+        if (cachedData is null)
+        {
+            Iterate();
+            callback(data, false);
+            CacheData();
+        }
+        else
+        {
+            LoadCache();
+        }
+
         while (!IsCollapsed())
         {
             if (!Iterate())
@@ -61,6 +73,24 @@ public class WaveFunctionCollapse
         OnFinishIsland?.Invoke();
     }
 
+    void CacheData()
+    {
+        cachedData = new Dictionary<Tile, Cell>();
+        foreach (Tile t in data.Keys)
+        {
+            cachedData.Add(t, new Cell(data[t]));
+        }
+    }
+
+    void LoadCache()
+    {
+        data = new Dictionary<Tile, Cell>();
+        foreach (Tile t in cachedData.Keys)
+        {
+            data.Add(t, new Cell(cachedData[t]));
+        }
+    }
+
     void InitializeDataStructure()
     {
         CellManager.Clear();
@@ -74,10 +104,7 @@ public class WaveFunctionCollapse
 
     void ResetData()
     {
-        foreach (Cell cell in data.Values)
-        {
-            cell.Reset();
-        }
+        LoadCache();
         TraversalManager.Init();
         CellManager.Clear();
     }
