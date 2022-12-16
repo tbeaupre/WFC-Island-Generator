@@ -32,12 +32,15 @@ public class WaveFunctionCollapse
     public static List<Prototype> topLevelPrototypes;
     public static List<Prototype> noOceans;
 
-    public IEnumerator CollapseCo(float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
+    public static UnityEngine.Random.State seed;
+
+    public IEnumerator CollapseCo(UnityEngine.Random.State? initSeed, float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
     {
         baseLevelPrototypes = PrototypeManager.prototypes.Where(p => MeshNameUtilities.IsBaseLevelPrototype(p)).ToList();
         topLevelPrototypes = PrototypeManager.prototypes.Where(p => MeshNameUtilities.IsTopLevelPrototype(p)).ToList();
         noOceans = PrototypeManager.prototypes.Where(p => !OceanHelper.IsOceanPrototype(p)).ToList();
 
+        InitRandomSeed(initSeed);
         InitializeDataStructure();
 
         OnStartIsland?.Invoke();
@@ -89,6 +92,19 @@ public class WaveFunctionCollapse
         }
     }
 
+    void InitRandomSeed(UnityEngine.Random.State? initSeed)
+    {
+        if (initSeed.HasValue)
+        {
+            seed = initSeed.Value;
+            UnityEngine.Random.state = initSeed.Value;
+        }
+        else
+        {
+            seed = UnityEngine.Random.state;
+        }
+    }
+
     void InitializeDataStructure()
     {
         CellManager.Clear();
@@ -102,6 +118,7 @@ public class WaveFunctionCollapse
 
     void ResetData()
     {
+        InitRandomSeed(null);
         LoadCache();
         TraversalManager.Init();
         CellManager.Clear();

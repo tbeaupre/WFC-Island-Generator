@@ -23,24 +23,31 @@ public class Main : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(wfc.CollapseCo(timeBetweenSteps, (data, drawAll) => {
-            Draw(data, drawAll);
-        }));
+        GenerateIsland();
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            StopAllCoroutines();
-            StartCoroutine(wfc.CollapseCo(timeBetweenSteps, (data, drawAll) => {
-                Draw(data, drawAll);
-            }));
+            GenerateIsland();
+        }
+        else if (Input.GetKeyDown(KeyCode.R))
+        {
+            GenerateIsland(WaveFunctionCollapse.seed);
         }
         else if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
         }
+    }
+
+    void GenerateIsland(UnityEngine.Random.State? initSeed = null)
+    {
+        StopAllCoroutines();
+        StartCoroutine(wfc.CollapseCo(initSeed, timeBetweenSteps, (data, drawAll) => {
+            Draw(data, drawAll);
+        }));
     }
 
     void Draw(Dictionary<Tile, Cell> data, bool drawAll)
