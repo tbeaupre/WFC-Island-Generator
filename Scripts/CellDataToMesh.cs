@@ -43,9 +43,9 @@ public class CellDataToMesh : MonoBehaviour
         UpdateName();
         if (drawAll && !isCollapsed)
         {
-            foreach (Prototype p in cell.prototypes)
+            foreach (int p in cell.prototypes)
             {
-                CreateMeshFromPrototype(p, cell.tile.ToTriangle(), cell.tile.y * yScaling);
+                CreateMeshFromPrototype(PrototypeManager.prototypes[p], cell.tile.ToTriangle(), cell.tile.y * yScaling);
             }
             if (cell.prototypes.Count == 1)
                 isCollapsed = true;
@@ -54,7 +54,7 @@ public class CellDataToMesh : MonoBehaviour
         {
             if (!isCollapsed && cell.prototypes.Count == 1)
             {
-                CreateMeshFromPrototype(cell.prototypes[0], cell.tile.ToTriangle(), cell.tile.y * yScaling);
+                CreateMeshFromPrototype(PrototypeManager.prototypes[cell.prototypes[0]], cell.tile.ToTriangle(), cell.tile.y * yScaling);
                 isCollapsed = true;
             }
         }
@@ -69,12 +69,12 @@ public class CellDataToMesh : MonoBehaviour
     {
         string tileCoords = $"{cell.tile.a}, {cell.tile.b}, {cell.tile.c}, {cell.tile.y}";
         if (cell.prototypes.Count == 1)
-            name = $"{tileCoords} Collapsed: {cell.prototypes[0].name}";
+            name = $"{tileCoords} Collapsed: {PrototypeManager.prototypes[cell.prototypes[0]].name}";
         else if (cell.prototypes.Count == 0)
             name = $"{tileCoords} FAILED";
         else
             name = tileCoords;
-        prototypeNames = cell.prototypes.Select(cell => cell.name).ToList();
+        prototypeNames = cell.prototypes.Select(p => PrototypeManager.prototypes[p].name).ToList();
     }
 
     Vector3 GetTriangleCenter(Triangle triangle, float y)

@@ -81,48 +81,9 @@ public class SocketSet
 [System.Serializable]
 public class ValidNeighbors
 {
-    public List<string> back;
-    public List<string> right;
-    public List<string> left;
-    public List<string> top;
-    public List<string> bottom;
-
-    public ValidNeighbors()
-    {
-        back = new List<string>();
-        right = new List<string>();
-        left = new List<string>();
-        top = new List<string>();
-        bottom = new List<string>();
-    }
-
-    public string ToString()
-    {
-        string result = "Back Neighbors: ";
-        foreach (string neighbor in back)
-        {
-            result += neighbor + ", ";
-        }
-        result += "\nRight Neighbors: ";
-        foreach (string neighbor in right)
-        {
-            result += neighbor + ", ";
-        }
-        result += "\nLeft Neighbors: ";
-        foreach (string neighbor in left)
-        {
-            result += neighbor + ", ";
-        }
-        result += "\nTop Neighbors: ";
-        foreach (string neighbor in top)
-        {
-            result += neighbor + ", ";
-        }
-        result += "\nBottom Neighbors: ";
-        foreach (string neighbor in bottom)
-        {
-            result += neighbor + ", ";
-        }
-        return result;
-    }
+    public List<int> back;
+    public List<int> right;
+    public List<int> left;
+    public List<int> top;
+    public List<int> bottom;
 }

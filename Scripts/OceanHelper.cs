@@ -52,7 +52,7 @@ public class OceanHelper
         if (!cell.IsCollapsed)
             return false;
 
-        return IsOceanPrototypeInDirection(cell.prototypes[0], dir);
+        return IsOceanPrototypeInDirection(PrototypeManager.prototypes[cell.prototypes[0]], dir);
     }
 
     static bool IsOceanPrototypeInDirection(Prototype p, Direction dir)

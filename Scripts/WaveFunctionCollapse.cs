@@ -134,7 +134,7 @@ public class WaveFunctionCollapse
             ++iterations;
             cellsAttempted.Add(currentCell);
 
-            HashSet<string>[] possibleNeighborSets = GetPossibleNeighbors(currentCell);
+            HashSet<int>[] possibleNeighborSets = GetPossibleNeighbors(currentCell);
             tasks.Clear();
             outputs.Clear();
 
@@ -188,16 +188,16 @@ public class WaveFunctionCollapse
         }
     }
 
-    static Output PropagateToNeighbors(int i, HashSet<string> possibleNeighbors, List<Prototype> neighborPrototypes)
+    static Output PropagateToNeighbors(int i, HashSet<int> possibleNeighbors, List<int> neighborPrototypes)
     {
         Output output = new Output(i);
 
         if (neighborPrototypes.Count == 0)
             return output; // by default wasSuccessful is false
 
-        foreach (Prototype otherPrototype in neighborPrototypes.ToArray())
+        foreach (int otherPrototype in neighborPrototypes.ToArray())
         {
-            if (!possibleNeighbors.Contains(otherPrototype.name))
+            if (!possibleNeighbors.Contains(otherPrototype))
             {
                 neighborPrototypes.Remove(otherPrototype);
                 if (neighborPrototypes.Count == 0)
@@ -210,21 +210,21 @@ public class WaveFunctionCollapse
         return output;
     }
 
-    HashSet<string>[] GetPossibleNeighbors(Cell cell)
+    HashSet<int>[] GetPossibleNeighbors(Cell cell)
     {
-        var result = new HashSet<string>[5];
+        var result = new HashSet<int>[5];
         for (int i = 0; i < 5; ++i)
         {
-            result[i] = new HashSet<string>();
+            result[i] = new HashSet<int>();
         }
 
-        foreach (Prototype p in cell.prototypes)
+        foreach (int p in cell.prototypes)
         {
-            result[0].UnionWith(p.validNeighbors.back);
-            result[1].UnionWith(p.validNeighbors.right);
-            result[2].UnionWith(p.validNeighbors.left);
-            result[3].UnionWith(p.validNeighbors.top);
-            result[4].UnionWith(p.validNeighbors.bottom);
+            result[0].UnionWith(PrototypeManager.prototypes[p].validNeighbors.back);
+            result[1].UnionWith(PrototypeManager.prototypes[p].validNeighbors.right);
+            result[2].UnionWith(PrototypeManager.prototypes[p].validNeighbors.left);
+            result[3].UnionWith(PrototypeManager.prototypes[p].validNeighbors.top);
+            result[4].UnionWith(PrototypeManager.prototypes[p].validNeighbors.bottom);
         }
         return result;
     }

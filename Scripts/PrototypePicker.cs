@@ -7,15 +7,16 @@ public static class PrototypePicker
 {
     public static Prototype PickPrototype(Cell cell)
     {
-        List<Prototype> possibleProtos = SkyHelper.ReduceForEdges(cell.tile, cell.prototypes);
+        List<Prototype> possibleProtos = cell.prototypes.Select(p => PrototypeManager.prototypes[p]).ToList();
+        possibleProtos = SkyHelper.ReduceForEdges(cell.tile, possibleProtos);
         possibleProtos = OceanHelper.ReduceForEdges(cell.tile, possibleProtos);
         if (possibleProtos.Count == cell.prototypes.Count)
         {
-            Prototype internalProto = cell.prototypes.Find(p => p.name == "III");
-            if (internalProto != null)
+            if (cell.prototypes.Contains(PrototypeManager.internalIndex))
             {
-                TraversalManager.SetTilePrototype(cell.tile, internalProto);
-                return internalProto;
+                Prototype internalPrototype = PrototypeManager.prototypes[PrototypeManager.internalIndex];
+                TraversalManager.SetTilePrototype(cell.tile, internalPrototype);
+                return internalPrototype;
             }
         }
         possibleProtos = OceanHelper.ReduceOceans(cell.tile, possibleProtos);

@@ -11,7 +11,7 @@ public static class SkyHelper
             return prototypes;
 
         List<Prototype> result = new List<Prototype>(prototypes);
-        result = result.Where(p => p.validNeighbors.top.Contains("EEE")).ToList();
+        result = result.Where(p => p.validNeighbors.top.Contains(PrototypeManager.externalIndex)).ToList();
         return result;
     }
 }

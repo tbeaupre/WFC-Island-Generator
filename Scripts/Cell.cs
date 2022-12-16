@@ -2,28 +2,29 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Cell
 {
     public Tile tile;
-    public List<Prototype> prototypes;
+    public List<int> prototypes;
     private Cell[] neighbors;
 
     public Cell(Cell cell)
     {
         this.tile = cell.tile;
-        this.prototypes = new List<Prototype>(cell.prototypes);
+        this.prototypes = new List<int>(cell.prototypes);
     }
 
     public Cell(Tile tile)
     {
         this.tile = tile;
         if (tile.y == 0)
-            this.prototypes = new List<Prototype>(WaveFunctionCollapse.baseLevelPrototypes);
+            this.prototypes = WaveFunctionCollapse.baseLevelPrototypes.Select(p => p.id).ToList();
         else if (tile.y == Main.height - 1)
-            this.prototypes = new List<Prototype>(WaveFunctionCollapse.topLevelPrototypes);
+            this.prototypes = WaveFunctionCollapse.topLevelPrototypes.Select(p => p.id).ToList();
         else
-            this.prototypes = new List<Prototype>(WaveFunctionCollapse.noOceans);
+            this.prototypes = WaveFunctionCollapse.noOceans.Select(p => p.id).ToList();
     }
 
     public bool IsCollapsed => prototypes.Count == 1;
@@ -51,19 +52,6 @@ public class Cell
     public void Collapse()
     {
         Prototype selected = PrototypePicker.PickPrototype(this);
-        prototypes = new List<Prototype> { selected };
-    }
-
-    public void CollapseTo(string prototypeName)
-    {
-        Prototype proto = prototypes.Find(p => p.name == prototypeName);
-        prototypes = new List<Prototype>();
-        prototypes.Add(proto);
-        TraversalManager.SetTilePrototype(tile, proto);
-    }
-
-    public void Constrain(Prototype prototype)
-    {
-        prototypes.Remove(prototype);
+        prototypes = new List<int> { selected.id };
     }
 }
