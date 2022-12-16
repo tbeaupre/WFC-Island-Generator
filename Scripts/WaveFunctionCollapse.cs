@@ -21,7 +21,6 @@ public class WaveFunctionCollapse
 {
     public static Dictionary<Tile, Cell> data;
     private static Dictionary<Tile, Cell> cachedData;
-    List<Prototype> prototypes;
 
     public delegate void StartIsland();
     public static event StartIsland OnStartIsland;
@@ -33,12 +32,11 @@ public class WaveFunctionCollapse
     public static List<Prototype> topLevelPrototypes;
     public static List<Prototype> noOceans;
 
-    public IEnumerator CollapseCo(List<Prototype> prototypes, float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
+    public IEnumerator CollapseCo(float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
     {
-        this.prototypes = prototypes;
-        baseLevelPrototypes = prototypes.Where(p => MeshNameUtilities.IsBaseLevelPrototype(p)).ToList();
-        topLevelPrototypes = prototypes.Where(p => MeshNameUtilities.IsTopLevelPrototype(p)).ToList();
-        noOceans = prototypes.Where(p => !OceanHelper.IsOceanPrototype(p)).ToList();
+        baseLevelPrototypes = PrototypeManager.prototypes.Where(p => MeshNameUtilities.IsBaseLevelPrototype(p)).ToList();
+        topLevelPrototypes = PrototypeManager.prototypes.Where(p => MeshNameUtilities.IsTopLevelPrototype(p)).ToList();
+        noOceans = PrototypeManager.prototypes.Where(p => !OceanHelper.IsOceanPrototype(p)).ToList();
 
         InitializeDataStructure();
 
@@ -256,7 +254,7 @@ public class WaveFunctionCollapse
 
     List<Cell> GetMinEntropyCells(List<Cell> cells)
     {
-        int lowestEntropyValue = prototypes.Count;
+        int lowestEntropyValue = cells[0].Entropy;
         List<Cell> candidates = new List<Cell>();
 
         foreach (Cell cell in cells)

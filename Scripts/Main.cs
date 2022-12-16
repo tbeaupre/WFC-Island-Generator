@@ -12,21 +12,18 @@ public class Main : MonoBehaviour
     WaveFunctionCollapse wfc;
     float timeBetweenSteps = 0;
 
-    private List<Prototype> prototypes;
-
     void Awake()
     {
         TileGrid.Init(radius, height);
         wfc = new WaveFunctionCollapse();
         CellManager.Init(transform);
+        PrototypeManager.Init();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        prototypes = ModuleLoader.GetPrototypesFromFile();
-
-        StartCoroutine(wfc.CollapseCo(prototypes, timeBetweenSteps, (data, drawAll) => {
+        StartCoroutine(wfc.CollapseCo(timeBetweenSteps, (data, drawAll) => {
             Draw(data, drawAll);
         }));
     }
@@ -36,7 +33,7 @@ public class Main : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             StopAllCoroutines();
-            StartCoroutine(wfc.CollapseCo(prototypes, timeBetweenSteps, (data, drawAll) => {
+            StartCoroutine(wfc.CollapseCo(timeBetweenSteps, (data, drawAll) => {
                 Draw(data, drawAll);
             }));
         }
