@@ -21,7 +21,7 @@ public class Cell
         this.tile = tile;
         if (tile.y == 0)
             this.prototypes = WaveFunctionCollapse.baseLevelPrototypes.Select(p => p.id).ToList();
-        else if (tile.y == Main.height - 1)
+        else if (tile.y == SettingsManager.Height - 1)
             this.prototypes = WaveFunctionCollapse.topLevelPrototypes.Select(p => p.id).ToList();
         else
             this.prototypes = WaveFunctionCollapse.noOceans.Select(p => p.id).ToList();

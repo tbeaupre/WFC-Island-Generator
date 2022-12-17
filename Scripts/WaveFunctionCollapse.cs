@@ -37,6 +37,7 @@ public class WaveFunctionCollapse
     public static void Init()
     {
         SettingsManager.OnRadiusChange += ClearCache;
+        SettingsManager.OnHeightChange += ClearCache;
     }
 
     public IEnumerator CollapseCo(UnityEngine.Random.State? initSeed, float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)

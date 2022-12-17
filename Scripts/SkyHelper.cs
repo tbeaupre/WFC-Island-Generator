@@ -7,7 +7,7 @@ public static class SkyHelper
 {
     public static List<Prototype> ReduceForEdges(Tile tile, List<Prototype> prototypes)
     {
-        if (tile.y != Main.height - 1)
+        if (tile.y != SettingsManager.Height - 1)
             return prototypes;
 
         List<Prototype> result = new List<Prototype>(prototypes);

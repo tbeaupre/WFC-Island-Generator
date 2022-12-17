@@ -16,4 +16,16 @@ public class SettingsManager
     }
     public delegate void RadiusChange();
     public static event RadiusChange OnRadiusChange;
+
+    private static int height;
+    public static int Height
+    {
+        get { return height; }
+        set {
+            height = value;
+            OnHeightChange?.Invoke();
+        }
+    }
+    public delegate void HeightChange();
+    public static event HeightChange OnHeightChange;
 }

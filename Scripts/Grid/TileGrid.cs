@@ -10,13 +10,14 @@ public static class TileGrid
     public static void Init()
     {
         SettingsManager.OnRadiusChange += Reset;
+        SettingsManager.OnHeightChange += Reset;
         Reset();
     }
 
     public static void Reset()
     {
         tileMap = new Dictionary<(int, int, int, int), Tile>();
-        CreateGrid(SettingsManager.Radius, Main.height);
+        CreateGrid(SettingsManager.Radius, SettingsManager.Height);
     }
 
     private static void CreateGrid(int radius, int height)

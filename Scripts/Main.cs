@@ -6,7 +6,6 @@ using System.Linq;
 
 public class Main : MonoBehaviour
 {
-    public static int height = 6;
     public int triangleSize = 2;
     WaveFunctionCollapse wfc;
     float timeBetweenSteps = 0;
