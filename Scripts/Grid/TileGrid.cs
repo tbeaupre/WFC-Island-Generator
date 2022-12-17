@@ -5,9 +5,21 @@ using System.Linq;
 
 public static class TileGrid
 {
-    public static Dictionary<(int, int, int, int), Tile> tileMap = new Dictionary<(int, int, int, int), Tile>();
+    public static Dictionary<(int, int, int, int), Tile> tileMap;
 
-    public static void Init(int radius, int height)
+    public static void Init()
+    {
+        SettingsManager.OnRadiusChange += Reset;
+        Reset();
+    }
+
+    public static void Reset()
+    {
+        tileMap = new Dictionary<(int, int, int, int), Tile>();
+        CreateGrid(SettingsManager.Radius, Main.height);
+    }
+
+    private static void CreateGrid(int radius, int height)
     {
         int min = -radius;
         int max = radius;

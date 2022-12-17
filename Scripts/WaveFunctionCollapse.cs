@@ -34,18 +34,20 @@ public class WaveFunctionCollapse
 
     public static UnityEngine.Random.State seed;
 
+    public static void Init()
+    {
+        SettingsManager.OnRadiusChange += ClearCache;
+    }
+
     public IEnumerator CollapseCo(UnityEngine.Random.State? initSeed, float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
     {
         baseLevelPrototypes = PrototypeManager.prototypes.Where(p => MeshNameUtilities.IsBaseLevelPrototype(p)).ToList();
         topLevelPrototypes = PrototypeManager.prototypes.Where(p => MeshNameUtilities.IsTopLevelPrototype(p)).ToList();
         noOceans = PrototypeManager.prototypes.Where(p => !OceanHelper.IsOceanPrototype(p)).ToList();
 
-        InitRandomSeed(initSeed);
         InitializeDataStructure();
 
         OnStartIsland?.Invoke();
-
-        Debug.Log("Starting");
 
         if (cachedData is null)
         {
@@ -57,6 +59,7 @@ public class WaveFunctionCollapse
         {
             LoadCache();
         }
+        InitRandomSeed(initSeed);
 
         while (!IsCollapsed())
         {
@@ -92,7 +95,13 @@ public class WaveFunctionCollapse
         }
     }
 
-    void InitRandomSeed(UnityEngine.Random.State? initSeed)
+    public static void ClearCache()
+    {
+        cachedData = null;
+        InitRandomSeed(null);
+    }
+
+    static void InitRandomSeed(UnityEngine.Random.State? initSeed)
     {
         if (initSeed.HasValue)
         {
@@ -200,7 +209,7 @@ public class WaveFunctionCollapse
             }
         }
 
-        Debug.Log($"{iterations} iterations updating {cellsAttempted.Count} of {data.Values.Count} cells");
+        // Debug.Log($"{iterations} iterations updating {cellsAttempted.Count} of {data.Values.Count} cells");
 
         return true;
     }

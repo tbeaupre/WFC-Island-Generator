@@ -7,14 +7,14 @@ using System.Linq;
 public class Main : MonoBehaviour
 {
     public static int height = 6;
-    public static int radius = 4;
     public int triangleSize = 2;
     WaveFunctionCollapse wfc;
     float timeBetweenSteps = 0;
 
     void Awake()
     {
-        TileGrid.Init(radius, height);
+        TileGrid.Init();
+        WaveFunctionCollapse.Init();
         wfc = new WaveFunctionCollapse();
         CellManager.Init(transform);
         PrototypeManager.Init();
@@ -28,15 +28,19 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (!SettingsManager.SettingsOpen)
         {
-            GenerateIsland();
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                GenerateIsland();
+            }
+            else if (Input.GetKeyDown(KeyCode.R))
+            {
+                GenerateIsland(WaveFunctionCollapse.seed);
+            }
         }
-        else if (Input.GetKeyDown(KeyCode.R))
-        {
-            GenerateIsland(WaveFunctionCollapse.seed);
-        }
-        else if (Input.GetKeyDown(KeyCode.Escape))
+
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
         }
