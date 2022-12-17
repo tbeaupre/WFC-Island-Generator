@@ -40,7 +40,7 @@ public class WaveFunctionCollapse
         SettingsManager.OnHeightChange += ClearCache;
     }
 
-    public IEnumerator CollapseCo(UnityEngine.Random.State? initSeed, float timeBetweenSteps, Action<Dictionary<Tile, Cell>, bool> callback)
+    public IEnumerator CollapseCo(UnityEngine.Random.State? initSeed, Action<Dictionary<Tile, Cell>, bool> callback)
     {
         baseLevelPrototypes = PrototypeManager.prototypes.Where(p => MeshNameUtilities.IsBaseLevelPrototype(p)).ToList();
         topLevelPrototypes = PrototypeManager.prototypes.Where(p => MeshNameUtilities.IsTopLevelPrototype(p)).ToList();
@@ -72,7 +72,7 @@ public class WaveFunctionCollapse
                 //yield break;
             }
             callback(data, false);
-            yield return new WaitForSeconds(timeBetweenSteps);
+            yield return new WaitForSeconds(1.0f - SettingsManager.Speed);
         }
 
         OnFinishIsland?.Invoke();

@@ -28,4 +28,6 @@ public class SettingsManager
     }
     public delegate void HeightChange();
     public static event HeightChange OnHeightChange;
+
+    public static float Speed { get; set; }
 }

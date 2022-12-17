@@ -8,7 +8,6 @@ public class Main : MonoBehaviour
 {
     public int triangleSize = 2;
     WaveFunctionCollapse wfc;
-    float timeBetweenSteps = 0;
 
     void Awake()
     {
@@ -48,7 +47,7 @@ public class Main : MonoBehaviour
     void GenerateIsland(UnityEngine.Random.State? initSeed = null)
     {
         StopAllCoroutines();
-        StartCoroutine(wfc.CollapseCo(initSeed, timeBetweenSteps, (data, drawAll) => {
+        StartCoroutine(wfc.CollapseCo(initSeed, (data, drawAll) => {
             Draw(data, drawAll);
         }));
     }
